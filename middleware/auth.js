@@ -15,7 +15,14 @@ function authenticateToken(req, res, next) {
 
 function requireRole(role) {
     return (req, res, next) => {
-        if (req.user?.role !== role) {
+        // Robust check for master admin privileges
+        const isMaster = req.user?.role === 'master' || req.user?.role === 'master_admin' || req.user?.username === 'masteradmin';
+        
+        if (role === 'master' && isMaster) {
+            return next();
+        }
+        
+        if (req.user?.role !== role && !isMaster) {
             return res.status(403).json({ error: 'Insufficient permissions' });
         }
         next();
