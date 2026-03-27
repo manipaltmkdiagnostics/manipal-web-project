@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Manipal Tumkur Diagnostics - Your trusted diagnostic laboratory in Tumkur. Accurate results, affordable prices, and home sample collection.">
+    <title>Manipal Tumkur Diagnostics — Trusted Lab & Diagnostic Centre</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="top-bar-left">
+                <span>📞 <a href="tel:+919980080433">+91 99800 80433</a></span>
+                <span>📧 <a href="mailto:manipaldiagnostic@gmail.com">manipaldiagnostic@gmail.com</a></span>
+            </div>
+            <div class="top-bar-right">
+                <span>🕐 Mon-Sat: 7:00 AM - 9:00 PM</span>
+                <span><a href="https://maps.app.goo.gl/t5nTPdLDenForXvk7">📍 Tumkur, Karnataka</a></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="/" class="nav-brand">
+                <div class="logo-icon">
+                    <!-- <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3ClinearGradient id='blue' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%232E4A99'/%3E%3Cstop offset='100%25' style='stop-color:%236B8FE8'/%3E%3C/linearGradient%3E%3ClinearGradient id='purple' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%238B4789'/%3E%3Cstop offset='100%25' style='stop-color:%23C084C0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='0,60 20,0 40,60' fill='url(%23blue)'/%3E%3Cpolygon points='30,60 50,0 70,60' fill='url(%23purple)'/%3E%3Cpolygon points='60,60 80,0 100,60' fill='url(%23purple)'/%3E%3C/svg%3E"
+                        alt="Manipal Logo">-->
+                    <img src="images/manipalLogo.jpeg" alt="Manipal Logo">
+                </div>
+                <div class="nav-brand-text">
+                    <span class="brand-name">Manipal Tumkur Diagnostics</span>
+                    <span class="brand-sub">Trusted Healthcare Partner</span>
+                </div>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="/" class="active">Home</a>
+                <a href="/tests.html">Tests</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+            </div>
+
+            <div class="nav-cta">
+                <button class="nav-cart-btn" id="navCartBtn" title="View Cart">
+                    <svg class="cart-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1" />
+                        <circle cx="20" cy="21" r="1" />
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                    </svg>
+                    <span class="cart-label">Cart</span>
+                    <span class="nav-cart-badge empty" id="navCartBadge">0</span>
+                </button>
+            </div>
+
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-watermark"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1>Empowering Your Health<br>with <span>Accurate Diagnostics</span></h1>
+                <p>Trusted by thousands of families in Tumkur. Get precise lab results with personalized care, timely
+                    insights,
+                    and affordable pricing.</p>
+                <div class="hero-actions">
+                    <a href="/tests.html" class="btn btn-primary btn-lg">🔬 View All Tests</a>
+                    <a href="tel:+919980080433" class="btn btn-secondary btn-lg">📞 Call Us Now</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-card">
+                    <h3>🔍 Search for a Test</h3>
+                    <div class="search-box">
+                        <span class="search-icon">🔎</span>
+                        <input type="text" id="heroSearch" placeholder="e.g. CBC, Thyroid, Sugar..." autocomplete="off">
+                    </div>
+                    <div id="heroSearchResults" style="max-height:150px;overflow-y:auto;margin-bottom:16px;"></div>
+                    <div class="hero-features">
+                        <div class="hero-feature"><span class="feature-icon">🏠</span> Home Collection</div>
+                        <div class="hero-feature"><span class="feature-icon">⚡</span> Quick Reports</div>
+                        <div class="hero-feature"><span class="feature-icon">💰</span> Best Prices</div>
+                        <div class="hero-feature"><span class="feature-icon">✅</span> Accurate Results</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Categories -->
+    <section class="section" id="categories">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <div class="section-badge">🏷️ Categories</div>
+                <h2>Select Test by <span>Categories</span></h2>
+                <p>Browse our comprehensive range of diagnostic tests organized by health concern</p>
+            </div>
+            <div class="scroll-wrapper">
+                <button class="scroll-arrow left" id="categoriesScrollLeft" aria-label="Scroll left">◀</button>
+                <div class="scroll-container categories-grid animate-on-scroll" id="categoriesScroll">
+                    <div class="category-card" data-category="Diabetes">
+                        <span class="cat-icon">🩸</span>
+                        <div class="cat-name">Diabetes</div>
+                        <div class="cat-count">3 Tests</div>
+                    </div>
+                    <div class="category-card" data-category="Thyroid">
+                        <span class="cat-icon">🦋</span>
+                        <div class="cat-name">Thyroid</div>
+                        <div class="cat-count">2 Tests</div>
+                    </div>
+                    <div class="category-card" data-category="Hematology">
+                        <span class="cat-icon">🔬</span>
+                        <div class="cat-name">Hematology</div>
+                        <div class="cat-count">3 Tests</div>
+                    </div>
+                    <div class="category-card" data-category="Biochemistry">
+                        <span class="cat-icon">⚗️</span>
+                        <div class="cat-name">Biochemistry</div>
+                        <div class="cat-count">3 Tests</div>
+                    </div>
+                    <div class="category-card" data-category="Vitamins">
+                        <span class="cat-icon">💊</span>
+                        <div class="cat-name">Vitamins</div>
+                        <div class="cat-count">2 Tests</div>
+                    </div>
+                    <div class="category-card" data-category="Health Package">
+                        <span class="cat-icon">📋</span>
+                        <div class="cat-name">Health Packages</div>
+                        <div class="cat-count">1 Package</div>
+                    </div>
+                    <div class="category-card" data-category="Infectious Disease">
+                        <span class="cat-icon">🦠</span>
+                        <div class="cat-name">Infections</div>
+                        <div class="cat-count">2 Tests</div>
+                    </div>
+                    <div class="category-card" data-category="Urine Analysis">
+                        <span class="cat-icon">🧪</span>
+                        <div class="cat-name">Urine Analysis</div>
+                        <div class="cat-count">1 Test</div>
+                    </div>
+                </div>
+                <button class="scroll-arrow right" id="categoriesScrollRight" aria-label="Scroll right">▶</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Tests -->
+    <section class="section section-alt" id="popular-tests">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <div class="section-badge">⭐ Popular</div>
+                <h2>Most Booked <span>Tests & Packages</span></h2>
+                <p>Our most popular diagnostic tests chosen by patients for preventive health care</p>
+            </div>
+
+            <!-- Test Packages Row -->
+            <div class="tests-row">
+                <h3>📋 <span>Health Packages</span></h3>
+                <div class="scroll-wrapper">
+                    <button class="scroll-arrow left" id="packagesScrollLeft" aria-label="Scroll left">◀</button>
+                    <div class="scroll-container" id="packagesScroll">
+                        <!-- Populated by JS -->
+                    </div>
+                    <button class="scroll-arrow right" id="packagesScrollRight" aria-label="Scroll right">▶</button>
+                </div>
+            </div>
+
+            <!-- Popular Tests Row -->
+            <div class="tests-row">
+                <h3>🔬 <span>Popular Tests</span></h3>
+                <div class="scroll-wrapper">
+                    <button class="scroll-arrow left" id="testsScrollLeft" aria-label="Scroll left">◀</button>
+                    <div class="scroll-container" id="testsScroll">
+                        <!-- Populated by JS -->
+                    </div>
+                    <button class="scroll-arrow right" id="testsScrollRight" aria-label="Scroll right">▶</button>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-top:36px;">
+                <a href="/tests.html" class="btn btn-secondary">View All Tests →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item animate-on-scroll">
+                    <div class="stat-number" data-target="50000">0</div>
+                    <div class="stat-label">Happy Patients</div>
+                </div>
+                <div class="stat-item animate-on-scroll">
+                    <div class="stat-number" data-target="200">0</div>
+                    <div class="stat-label">Tests Available</div>
+                </div>
+                <div class="stat-item animate-on-scroll">
+                    <div class="stat-number" data-target="13">0</div>
+                    <div class="stat-label">Years of Trust</div>
+                </div>
+                <div class="stat-item animate-on-scroll">
+                    <div class="stat-number" data-target="10">0</div>
+                    <div class="stat-label">Expert Team</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="section" id="about">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <div class="section-badge">💡 Why Us</div>
+                <h2>Why Choose <span>Manipal Tumkur Diagnostics</span>?</h2>
+                <p>We combine advanced technology with compassionate care for the most reliable results</p>
+            </div>
+            <div class="scroll-wrapper">
+                <button class="scroll-arrow left" id="featuresScrollLeft" aria-label="Scroll left">◀</button>
+                <div class="scroll-container features-scroll animate-on-scroll" id="featuresScroll">
+                    <div class="feature-card">
+                        <div class="feature-icon-box">🎯</div>
+                        <h3>Accurate Results</h3>
+                        <p>State-of-the-art analyzers and strict quality protocols ensure precision in every report.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon-box">🏠</div>
+                        <h3>Home Collection</h3>
+                        <p>Convenient doorstep sample collection by trained phlebotomists at no extra charge.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon-box">⚡</div>
+                        <h3>Quick Turnaround</h3>
+                        <p>Most reports delivered within 6-24 hours. Urgent reports available in express mode.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon-box">💰</div>
+                        <h3>Affordable Pricing</h3>
+                        <p>Quality diagnostics at competitive prices with transparent billing and no hidden charges.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon-box">📱</div>
+                        <h3>Digital Reports</h3>
+                        <p>Access your reports online anytime. Get instant notifications via SMS and email.</p>
+                    </div>
+                </div>
+                <button class="scroll-arrow right" id="featuresScrollRight" aria-label="Scroll right">▶</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery -->
+    <section class="section section-alt" id="gallery">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <div class="section-badge">📸 Gallery</div>
+                <h2>Our <span>State-of-the-Art</span> Facility</h2>
+                <p>Take a virtual tour of our modern laboratory and patient-friendly environment</p>
+            </div>
+            <div class="scroll-wrapper">
+                <button class="scroll-arrow left" id="galleryScrollLeft" aria-label="Scroll left">◀</button>
+                <div class="scroll-container gallery-scroll animate-on-scroll" id="galleryGrid">
+                    <!-- Populated by JS from API, or default placeholders -->
+                </div>
+                <button class="scroll-arrow right" id="galleryScrollRight" aria-label="Scroll right">▶</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="section" id="testimonials">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <div class="section-badge">💬 Feedback</div>
+                <h2>What Our <span>Patients Say</span></h2>
+                <p>Hear from the families who trust us with their health</p>
+            </div>
+        </div>
+        <div class="testimonials-outer">
+            <div class="testimonials-track" id="testimonialsTrack">
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <blockquote>"Excellent service...They respond quickly and the results are very accurate"
+                    </blockquote>
+                    <div class="author">
+                        <div class="author-avatar">O</div>
+                        <div class="author-info">
+                            <strong>Omkarmurthy</strong>
+                            <span>Tumkur</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <blockquote>"I hope they maintain good hygiene and provide a good diagnosis, good care and accurate
+                        reporting"</blockquote>
+                    <div class="author">
+                        <div class="author-avatar">LT</div>
+                        <div class="author-info">
+                            <strong>Likith T</strong>
+                            <span>Tumkur</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <blockquote>"Smooth service and accurate result"</blockquote>
+                    <div class="author">
+                        <div class="author-avatar">CC</div>
+                        <div class="author-info">
+                            <strong>CS Chetan</strong>
+                            <span>Tumkur</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <blockquote>"Very professional staff, prices are reasonable compared to other labs, most of the test
+                        reports will get same day. Highly recommended clinical laboratory in Tumkur."</blockquote>
+                    <div class="author">
+                        <div class="author-avatar">D</div>
+                        <div class="author-info">
+                            <strong>L M Deepak</strong>
+                            <span>Tumkur</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <blockquote>"My doctor recommended this lab and I'm glad I chose it. The reports are comprehensive
+                        and my doctor was very happy with the accuracy. The prices are also very pocket-friendly."
+                    </blockquote>
+                    <div class="author">
+                        <div class="author-avatar">MN</div>
+                        <div class="author-info">
+                            <strong>Meena Nagesh</strong>
+                            <span>Tumkur</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- CTA Banner -->
+    <section class="cta-banner">
+        <div class="container">
+            <h2>Book Your Health Checkup Today</h2>
+            <p>Quality diagnostics at your doorstep. Home collection available across Tumkur.</p>
+            <a href="/tests.html" class="btn btn-lg">🔬 Browse All Tests</a>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <div class="section-badge">❓ FAQ</div>
+                <h2>Frequently Asked <span>Questions</span></h2>
+            </div>
+            <div class="faq-list animate-on-scroll">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How do I book a home sample collection?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>You can book a home sample collection by calling us at +91 99800 80433 or by adding tests to
+                            your cart on our website and submitting your details. Our phlebotomist will visit at your
+                            convenience.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How soon will I receive my test reports?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Most routine test reports are available within 6-12 hours. Specialized tests may take up to
+                            24-48 hours.
+                            You'll receive your reports via email and SMS as soon as they are ready.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Do I need to fast before blood tests?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Some tests like Lipid Profile, Blood Sugar Fasting, and Liver Function Tests require 10-12
+                            hours of
+                            overnight fasting. Each test listing on our website mentions whether fasting is required.
+                        </p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>What payment methods do you accept?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We accept cash, all major credit/debit cards, UPI payments (GPay, PhonePe, Paytm), and net
+                            banking.
+                            Payment can be made at the centre or at the time of home collection.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Can I walk in without an appointment?</span>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Absolutely! Walk-ins are welcome during our operating hours (Mon-Sat, 7:00 AM - 9:00 PM).
+                            However,
+                            booking in advance helps us serve you faster and with less waiting time.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <a href="https://wa.me/919980080433" target="_blank" rel="noopener" class="whatsapp-float"
+        aria-label="Chat on WhatsApp">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="white" width="32" height="32">
+            <path
+                d="M16 0C7.163 0 0 7.163 0 16c0 2.824.736 5.469 2.025 7.77L0 32l8.456-2.001A15.93 15.93 0 0 0 16 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm0 29.333a13.28 13.28 0 0 1-6.767-1.849l-.484-.288-5.019 1.188 1.27-4.886-.317-.502A13.26 13.26 0 0 1 2.667 16C2.667 8.636 8.636 2.667 16 2.667S29.333 8.636 29.333 16 23.364 29.333 16 29.333zm7.272-9.992c-.398-.199-2.353-1.161-2.718-1.294-.365-.133-.631-.199-.896.199-.265.398-1.028 1.294-1.26 1.559-.232.265-.464.298-.862.1-.398-.199-1.68-.619-3.2-1.977-1.182-1.056-1.98-2.36-2.213-2.758-.232-.398-.025-.613.174-.811.18-.179.4-.465.598-.698.2-.233.266-.398.4-.664.133-.265.066-.498-.033-.697-.1-.199-.896-2.16-1.228-2.957-.323-.776-.651-.671-.897-.683-.232-.012-.499-.015-.766-.015-.265 0-.697.1-1.062.498-.365.398-1.394 1.361-1.394 3.32 0 1.96 1.427 3.851 1.626 4.117.199.265 2.808 4.287 6.803 6.014.951.41 1.693.655 2.272.839.954.304 1.823.261 2.51.158.765-.114 2.353-.962 2.685-1.891.332-.93.332-1.726.232-1.891-.099-.166-.365-.265-.763-.464z" />
+        </svg>
+    </a>
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="logo-text">Manipal Tumkur <span>Diagnostics</span></div>
+                    <p>Your trusted partner in health diagnostics. Providing accurate, affordable, and reliable
+                        laboratory
+                        services to the people of Tumkur and surrounding areas since 2013.</p>
+                    <div class="footer-social-col">
+                        <span class="social-heading">Follow us on</span>
+                        <a href="https://www.facebook.com/share/1DnpWtp9YS/" aria-label="Facebook" class="social-link">
+                            <span class="social-icon fb-icon">f</span>
+                            <span>Facebook</span>
+                        </a>
+                        <a href="https://share.google/8qBW1WCBWDFl4Itfq" aria-label="Google" class="social-link">
+                            <span class="social-icon google-icon">G</span>
+                            <span>Google</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/tests.html">All Tests</a></li>
+                        <li><a href="#contact">Contact Us</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#faq">FAQs</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Popular Tests</h4>
+                    <ul>
+                        <li><a href="/tests.html">Complete Blood Count</a></li>
+                        <li><a href="/tests.html">Thyroid Profile</a></li>
+                        <li><a href="/tests.html">Lipid Profile</a></li>
+                        <li><a href="/tests.html">Blood Sugar</a></li>
+                        <li><a href="/tests.html">Full Body Checkup</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact Info</h4>
+                    <ul>
+                        <li>📍 206, Sri Shivakumar Swamiji Circle, Vijaya Karnataka Office Building, Ashok Nagar,
+                            Tumakuru - 572102</li>
+                        <li>📞 <a href="tel:+919980080433">+91 99800 80433</a></li>
+                        <li>📧 <a href="mailto:manipaldiagnostic@gmail.com">manipaldiagnostic@gmail.com</a>
+                        </li>
+                        <li>🕐 Mon-Sat: 7 AM - 9 PM</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 Manipal Tumkur Diagnostics. All rights reserved. | <a href="/admin/login.html"
+                        id="footerAuthBtn"
+                        style="color:rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s; cursor: pointer;">Sign
+                        In</a></p>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script src="/js/main.js"></script>
+</body>
+
+</html>

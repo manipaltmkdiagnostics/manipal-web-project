@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Manipal Tumkur Admin</title>
+    <link rel="stylesheet" href="/admin/css/admin.css">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">M</div>
+            <div class="brand-text">
+                Manipal Tumkur<small>Admin Portal</small>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-label">Main</div>
+            <a href="#" class="active" data-section="dashboard" onclick="showSection('dashboard',this)">
+                <span class="nav-icon">📊</span> Dashboard
+            </a>
+            <a href="#" data-section="bookings" onclick="showSection('bookings',this)">
+                <span class="nav-icon">📅</span> Bookings
+            </a>
+            <a href="#" data-section="packages" onclick="showSection('packages',this)" id="navPackages" style="display:none;">
+                <span class="nav-icon">📦</span> Health Packages
+            </a>
+
+            <div class="nav-label" id="masterLabel" style="display:none;">Master Admin</div>
+            <a href="#" data-section="tests" onclick="showSection('tests',this)" id="navTests" style="display:none;">
+                <span class="nav-icon">🧪</span> Tests & Pricing
+            </a>
+            <a href="#" data-section="photos" onclick="showSection('photos',this)" id="navPhotos" style="display:none;">
+                <span class="nav-icon">📸</span> Photo Gallery
+            </a>
+            <a href="#" data-section="admins" onclick="showSection('admins',this)" id="navAdmins" style="display:none;">
+                <span class="nav-icon">👥</span> Manage Admins
+            </a>
+
+            <div class="nav-label">Quick Links</div>
+            <a href="/" target="_blank">
+                <span class="nav-icon">🌐</span> View Website
+            </a>
+        </nav>
+
+        <div class="sidebar-user">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">M</div>
+                <div>
+                    <div class="user-name" id="userName">Admin</div>
+                    <div class="user-role" id="userRole">admin</div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()" title="Logout">🚪</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- ========== PACKAGES SECTION (Master Only) ========== -->
+        <div class="admin-section" id="section-packages">
+            <div class="admin-topbar">
+                <h1>📦 Health Packages</h1>
+                <div class="topbar-actions">
+                    <button class="btn btn-primary" onclick="openPackageModal()">+ Add Package</button>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Package Name</th>
+                            <th>Description</th>
+                            <th>Tests Included</th>
+                            <th>Total Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="packagesTable">
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                <p>Loading...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========== DASHBOARD SECTION ========== -->
+        <div class="admin-section active" id="section-dashboard">
+            <div class="admin-topbar">
+                <h1>📊 Dashboard</h1>
+                <div class="topbar-actions">
+                    <span style="color:var(--text-muted);font-size:0.85rem;" id="dashDate"></span>
+                </div>
+            </div>
+
+            <div class="stat-cards" id="dashStats">
+                <div class="stat-card">
+                    <div class="stat-icon blue">📅</div>
+                    <div class="stat-info">
+                        <h3 id="statTotal">—</h3>
+                        <p>Total Bookings</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">⏳</div>
+                    <div class="stat-info">
+                        <h3 id="statPending">—</h3>
+                        <p>Pending</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">✅</div>
+                    <div class="stat-info">
+                        <h3 id="statCompleted">—</h3>
+                        <p>Completed</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">📆</div>
+                    <div class="stat-info">
+                        <h3 id="statToday">—</h3>
+                        <p>Today</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Bookings -->
+            <div class="data-card">
+                <div class="data-card-header">
+                    <h3>📅 Recent Bookings</h3>
+                    <button class="btn btn-primary btn-sm"
+                        onclick="showSection('bookings',document.querySelector('[data-section=bookings]'))">View All
+                        →</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Test</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentBookings">
+                        <tr>
+                            <td colspan="4" class="empty-state">
+                                <p>Loading...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========== BOOKINGS SECTION ========== -->
+        <div class="admin-section" id="section-bookings">
+            <div class="admin-topbar">
+                <h1>📅 Bookings</h1>
+                <div class="topbar-actions">
+                    <select id="bookingStatusFilter" onchange="loadBookings()"
+                        style="padding:8px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:Inter;font-size:0.85rem;">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="sample_collected">Sample Collected</option>
+                        <option value="processing">Processing</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Patient</th>
+                            <th>Phone</th>
+                            <th>Test</th>
+                            <th>Date/Time</th>
+                            <th>Home</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingsTable">
+                        <tr>
+                            <td colspan="8" class="empty-state">
+                                <p>Loading...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========== TESTS SECTION (Master Only) ========== -->
+        <div class="admin-section" id="section-tests">
+            <div class="admin-topbar">
+                <h1>🧪 Tests & Pricing</h1>
+                <div class="topbar-actions">
+                    <button class="btn btn-primary" onclick="openTestModal()">+ Add Test</button>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Original</th>
+                            <th>Report Time</th>
+                            <th>Popular</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="testsTable">
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                <p>Loading...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========== PHOTOS SECTION (Master Only) ========== -->
+        <div class="admin-section" id="section-photos">
+            <div class="admin-topbar">
+                <h1>📸 Photo Gallery</h1>
+                <div class="topbar-actions">
+                    <button class="btn btn-primary" onclick="openPhotoModal()">+ Upload Photo</button>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <div class="photos-grid" id="photosGrid">
+                    <div class="empty-state" style="grid-column:1/-1;">
+                        <div class="empty-icon">📸</div>
+                        <h3>No photos yet</h3>
+                        <p>Upload photos to showcase your lab</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ADMINS SECTION (Master Only) ========== -->
+        <div class="admin-section" id="section-admins">
+            <div class="admin-topbar">
+                <h1>👥 Manage Admins</h1>
+                <div class="topbar-actions">
+                    <button class="btn btn-primary" onclick="openAdminModal()">+ Create Admin</button>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Full Name</th>
+                            <th>Role</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminsTable">
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                <p>Loading...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ========== MODALS ========== -->
+
+    <!-- Test Modal -->
+    <div class="modal-overlay" id="testModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="testModalTitle">Add Test</h2>
+                <button class="modal-close" onclick="closeModal('testModal')">×</button>
+            </div>
+            <form id="testForm">
+                <input type="hidden" id="testId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Test Name *</label>
+                        <input type="text" id="testName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <input type="text" id="testCategory" required placeholder="e.g. Hematology">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="testDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Parameters</label>
+                    <input type="text" id="testParameters" placeholder="e.g. RBC, WBC, Hemoglobin">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price (₹) *</label>
+                        <input type="number" id="testPrice" required min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Original Price (₹)</label>
+                        <input type="number" id="testOriginalPrice" min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Turnaround Time</label>
+                        <input type="text" id="testTurnaround" placeholder="e.g. 6 hours">
+                    </div>
+                    <div class="form-group">
+                        <label>Sample Type</label>
+                        <input type="text" id="testSampleType" placeholder="e.g. Blood">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="checkbox" id="testFasting"
+                                style="width:16px;height:16px;accent-color:var(--primary);">
+                            Fasting Required
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="checkbox" id="testPopular"
+                                style="width:16px;height:16px;accent-color:var(--primary);">
+                            Mark as Popular
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Test Image (Optional Watermark)</label>
+                    <input type="file" id="testImage" accept="image/*" style="padding:8px;">
+                    <div id="testImagePreview" style="margin-top:10px; display: none;">
+                        <img id="testImageDisplay" style="max-height: 100px; border-radius: 4px;">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeTestImage()"
+                            style="display: block; margin-top: 5px;">Remove Image</button>
+                    </div>
+                </div>
+                <div class="form-row" id="imageSizingRow">
+                    <div class="form-group">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="checkbox" id="imageStandardSize" checked onchange="toggleCustomSizeFields()"
+                                style="width:16px;height:16px;accent-color:var(--primary);">
+                            Use Standard Size (200x200)
+                        </label>
+                    </div>
+                </div>
+                <div class="form-row" id="customSizeFields" style="display:none;">
+                    <div class="form-group">
+                        <label>Max Width (px)</label>
+                        <input type="number" id="imageMaxWidth" value="200" min="50">
+                    </div>
+                    <div class="form-group">
+                        <label>Max Height (px)</label>
+                        <input type="number" id="imageMaxHeight" value="200" min="50">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('testModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="testSubmitBtn">Save Test</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Photo Modal -->
+    <div class="modal-overlay" id="photoModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="photoModalTitle">Upload Photo</h2>
+                <button class="modal-close" onclick="closeModal('photoModal')">×</button>
+            </div>
+            <form id="photoForm">
+                <input type="hidden" id="photoId">
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" id="photoTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="photoCategory">
+                        <option value="gallery">Gallery</option>
+                        <option value="lab">Lab</option>
+                        <option value="equipment">Equipment</option>
+                        <option value="team">Team</option>
+                        <option value="banner">Banner</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="photoDescription" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Photo *</label>
+                    <input type="file" id="photoFile" accept="image/*" style="padding:8px;">
+                    <div id="photoPreview" style="margin-top:10px;"></div>
+                </div>
+                <div class="form-group">
+                    <label>Display Order</label>
+                    <input type="number" id="photoOrder" value="0" min="0">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('photoModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="photoSubmitBtn">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Create New Admin</h2>
+                <button class="modal-close" onclick="closeModal('adminModal')">×</button>
+            </div>
+            <form id="adminForm">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="adminFullName" required>
+                </div>
+                <div class="form-group">
+                    <label>Username *</label>
+                    <input type="text" id="adminUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Password * (min 6 characters)</label>
+                    <input type="password" id="adminPassword" required minlength="6">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('adminModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Admin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Booking Status Modal -->
+    <div class="modal-overlay" id="bookingModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Update Booking</h2>
+                <button class="modal-close" onclick="closeModal('bookingModal')">×</button>
+            </div>
+            <form id="bookingUpdateForm" enctype="multipart/form-data">
+                <input type="hidden" id="bookingId">
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="bookingStatus" onchange="toggleReportField()">
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="sample_collected">Sample Collected</option>
+                        <option value="processing">Processing</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="form-group" id="reportUploadGroup" style="display:none;">
+                    <label>📄 Upload Test Report (PDF) *</label>
+                    <input type="file" id="reportFile" accept=".pdf" style="padding:8px;">
+                    <p id="reportNote" style="margin-top:6px;font-size:0.8rem;color:var(--text-muted);">
+                        A PDF report is required to mark this booking as completed.
+                    </p>
+                    <div id="existingReport" style="display:none;margin-top:8px;">
+                        <span style="color:var(--success);font-weight:600;font-size:0.85rem;">✅ Report already
+                            uploaded</span>
+                        <a href="#" id="existingReportLink" target="_blank"
+                            style="margin-left:8px;color:var(--primary);font-size:0.85rem;font-weight:500;">📥
+                            Download</a>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="bookingNotes" rows="3" placeholder="Add any notes..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('bookingModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Package Modal -->
+    <div class="modal-overlay" id="packageModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="packageModalTitle">Add Health Package</h2>
+                <button class="modal-close" onclick="closeModal('packageModal')">×</button>
+            </div>
+            <form id="packageForm">
+                <input type="hidden" id="packageId">
+                <div class="form-group">
+                    <label>Package Name *</label>
+                    <input type="text" id="packageName" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="packageDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Total Price (₹) *</label>
+                    <input type="number" id="packagePrice" required min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Select Tests *</label>
+                    <div id="packageTestsList" style="max-height: 200px; overflow-y: auto; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px;">
+                        <!-- Tests checkboxes will be loaded here -->
+                        <p style="color:var(--text-muted);font-size:0.9rem;">Loading tests...</p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('packageModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="packageSubmitBtn">Save Package</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script src="/admin/js/admin.js"></script>
+</body>
+
+</html>
