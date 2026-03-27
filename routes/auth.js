@@ -37,6 +37,8 @@ router.post('/login', async (req, res) => {
             { expiresIn: '24h' }
         );
 
+        console.log(`[DEBUG] Login successful: User ${admin.username}, Role: ${admin.role}`);
+        
         res.json({
             token,
             user: {

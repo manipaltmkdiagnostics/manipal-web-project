@@ -11,7 +11,11 @@ app.use(express.json());
 
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/admin', express.static(path.join(__dirname, 'admin')));
+app.use('/admin', express.static(path.join(__dirname, 'admin'), {
+    setHeaders: (res, filePath) => {
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    }
+}));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes

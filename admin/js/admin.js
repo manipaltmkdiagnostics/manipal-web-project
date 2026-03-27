@@ -49,6 +49,7 @@ async function apiFetch(url, options = {}) {
 
 /* ------ UI Init ------ */
 function initUI() {
+    console.log('[DEBUG] Initializing UI. Current User:', currentUser);
     // Robust master check
     const isMaster = currentUser.role === 'master' || currentUser.role === 'master_admin' || currentUser.username === 'masteradmin';
 
