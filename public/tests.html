@@ -15,45 +15,57 @@
 
 <body>
 
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="top-bar-left">
+                <span>📞 <a href="tel:+919980080433">+91 99800 80433</a></span>
+                <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20" style="vertical-align:middle;margin-right:5px;flex-shrink:0"><path fill="#4caf50" d="M45,16.2l-5,2.75l-5,4.75L35,40h7c1.657,0,3-1.343,3-3V16.2z"/><path fill="#1e88e5" d="M3,16.2l3.614,1.71L13,23.7V40H6c-1.657,0-3-1.343-3-3V16.2z"/><polygon fill="#e53935" points="35,11.2 24,19.45 13,11.2 12,17 13,23.7 24,31.45 35,23.7 36,17"/><path fill="#c62828" d="M3,12.298V16.2l10,7.5V11.2L9.876,8.859C9.132,8.301,8.228,8,7.298,8h0C4.924,8,3,9.924,3,12.298z"/><path fill="#fbc02d" d="M45,12.298V16.2l-10,7.5V11.2l3.124-2.341C38.868,8.301,39.772,8,40.702,8h0C43.076,8,45,9.924,45,12.298z"/></svg><a href="mailto:manipaldiagnostic@gmail.com">manipaldiagnostic@gmail.com</a></span>
+            </div>
+            <div class="top-bar-right">
+                <span><span class="badge-24x7"><i class="fa-solid fa-clock" style="font-size:0.75rem;"></i> 24x7</span></span>
+                <span><a href="https://maps.app.goo.gl/t5nTPdLDenForXvk7"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15" style="vertical-align:middle;margin-right:4px;flex-shrink:0"><path fill="#EA4335" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/><path fill="#FBBC04" d="M12 2v7h7c0-3.87-3.13-7-7-7z" opacity="0.4"/><path fill="#34A853" d="M19 9c0 1.3-.3 2.54-.82 3.65L12 22V9h7z" opacity="0.4"/></svg>Tumkur<span class="location-suffix">, Karnataka</span></a></span>
+            </div>
+        </div>
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar" id="navbar">
         <div class="container">
             <a href="/" class="nav-brand">
-                <a href="/" class="nav-brand">
-                    <div class="logo-icon">
-                        <!-- <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3ClinearGradient id='blue' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%232E4A99'/%3E%3Cstop offset='100%25' style='stop-color:%236B8FE8'/%3E%3C/linearGradient%3E%3ClinearGradient id='purple' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%238B4789'/%3E%3Cstop offset='100%25' style='stop-color:%23C084C0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpolygon points='0,60 20,0 40,60' fill='url(%23blue)'/%3E%3Cpolygon points='30,60 50,0 70,60' fill='url(%23purple)'/%3E%3Cpolygon points='60,60 80,0 100,60' fill='url(%23purple)'/%3E%3C/svg%3E"
-                        alt="Manipal Logo">-->
-                        <img src="images/manipalLogo.jpeg" alt="Manipal Logo">
-                    </div>
-                    <div class="nav-brand-text">
-                        <span class="brand-name">Manipal Tumkur Diagnostics</span>
-                        <span class="brand-sub">Trusted Healthcare Partner</span>
-                    </div>
-                </a>
-                <div class="nav-links" id="navLinks">
-                    <a href="/">Home</a>
-                    <a href="/tests.html" class="active">Tests</a>
-                    <a href="/#about">About</a>
-                    <a href="/#contact">Contact</a>
+                <div class="logo-icon">
+                    <img src="images/manipalLogo.jpeg" alt="Manipal Tumkur Diagnostics Logo">
                 </div>
-                <div class="nav-cta">
-                    <button class="nav-cart-btn" id="navCartBtn" title="View Cart">
-                        <svg class="cart-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="9" cy="21" r="1" />
-                            <circle cx="20" cy="21" r="1" />
-                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                        </svg>
-                        <span class="cart-label">Cart</span>
-                        <span class="nav-cart-badge empty" id="navCartBadge">0</span>
-                    </button>
+                <div class="nav-brand-text">
+                    <span class="brand-name">Manipal Tumkur Diagnostics</span>
+                    <span class="brand-sub">Trusted Healthcare Partner</span>
                 </div>
-                <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
-                    <span></span><span></span><span></span>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a href="/">Home</a>
+                <a href="/tests.html" class="active">Tests</a>
+                <a href="/#about">About</a>
+                <a href="/#contact">Contact</a>
+            </div>
+            <div class="nav-cta">
+                <button class="nav-cart-btn" id="navCartBtn" title="View Cart">
+                    <svg class="cart-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1" />
+                        <circle cx="20" cy="21" r="1" />
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                    </svg>
+                    <span class="cart-label">Cart</span>
+                    <span class="nav-cart-badge empty" id="navCartBadge">0</span>
                 </button>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
         </div>
     </nav>
+
 
     <a href="https://wa.me/919980080433" target="_blank" rel="noopener" class="whatsapp-float" aria-label="Chat on WhatsApp">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="white" width="32" height="32"><path d="M16 0C7.163 0 0 7.163 0 16c0 2.824.736 5.469 2.025 7.77L0 32l8.456-2.001A15.93 15.93 0 0 0 16 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm0 29.333a13.28 13.28 0 0 1-6.767-1.849l-.484-.288-5.019 1.188 1.27-4.886-.317-.502A13.26 13.26 0 0 1 2.667 16C2.667 8.636 8.636 2.667 16 2.667S29.333 8.636 29.333 16 23.364 29.333 16 29.333zm7.272-9.992c-.398-.199-2.353-1.161-2.718-1.294-.365-.133-.631-.199-.896.199-.265.398-1.028 1.294-1.26 1.559-.232.265-.464.298-.862.1-.398-.199-1.68-.619-3.2-1.977-1.182-1.056-1.98-2.36-2.213-2.758-.232-.398-.025-.613.174-.811.18-.179.4-.465.598-.698.2-.233.266-.398.4-.664.133-.265.066-.498-.033-.697-.1-.199-.896-2.16-1.228-2.957-.323-.776-.651-.671-.897-.683-.232-.012-.499-.015-.766-.015-.265 0-.697.1-1.062.498-.365.398-1.394 1.361-1.394 3.32 0 1.96 1.427 3.851 1.626 4.117.199.265 2.808 4.287 6.803 6.014.951.41 1.693.655 2.272.839.954.304 1.823.261 2.51.158.765-.114 2.353-.962 2.685-1.891.332-.93.332-1.726.232-1.891-.099-.166-.365-.265-.763-.464z"/></svg>
@@ -157,13 +169,12 @@
                 const tests = await testsRes.json();
                 const packages = await packagesRes.json();
 
-                // Add itemType to distinguish
                 const normalizedTests = tests.map(t => ({ ...t, itemType: 'test' }));
                 const normalizedPackages = packages.map(p => ({
                     ...p,
                     itemType: 'package',
-                    category: 'Health Package', // Ensure they have the correct category label
-                    is_popular: true // Default packages to popular for visibility
+                    category: 'Health Package',
+                    is_popular: true
                 }));
 
                 allTests = [...normalizedTests, ...normalizedPackages];
@@ -207,7 +218,7 @@
                     check: '✅'
                 };
                 const discount = t.original_price ? Math.round((1 - t.price / t.original_price) * 100) : 0;
-                const inCart = getCart().find(c => c.id === t.id && c.itemType === t.itemType);
+                const inCart = getCart().find(c => String(c.id) === String(t.id) && c.itemType === t.itemType);
 
                 let watermark = '';
                 if (t.itemType === 'package') {
@@ -222,18 +233,8 @@
                     `;
                 }
 
-                // For packages, show the list of tests
-                let packageDetails = '';
-                if (t.itemType === 'package' && t.tests && t.tests.length > 0) {
-                    packageDetails = `
-                        <div class="package-includes" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border-light);">
-                            <div style="font-size:0.75rem;font-weight:700;color:var(--primary);margin-bottom:5px;text-transform:uppercase;">Includes ${t.tests.length} Tests:</div>
-                            <div style="display:flex;flex-wrap:wrap;gap:4px;">
-                                ${t.tests.map(pt => `<span style="font-size:0.7rem;background:var(--bg-alt);padding:2px 6px;border-radius:4px;border:1px solid var(--border-light);">${pt.name}</span>`).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
+                const desc = (t.description || '').trim();
+                const safeDesc = desc.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
                 return `
           <div class="test-card ${t.itemType === 'package' ? 'package-card' : ''}" style="${t.itemType === 'package' ? 'border: 2px solid var(--primary-light);' : ''}">
@@ -243,8 +244,20 @@
               ${t.is_popular ? `<span style="color:var(--secondary);font-size:0.8rem;font-weight:600;">${UI_ICONS.popular} Popular</span>` : ''}
             </div>
             <h3>${t.name}</h3>
-            <p>${t.description || ''}</p>
-            ${packageDetails}
+
+            <div class="test-card-desc-wrap">
+              ${safeDesc ? `<p class="test-card-desc">${safeDesc}</p>
+              <button
+                class="btn-read-more"
+                data-test-id="${t.id}"
+                data-item-type="${t.itemType}"
+                aria-label="Read more about ${(t.name || '').replace(/"/g, '&quot;')}"
+                style="display:none;">
+                Read more
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>` : ''}
+            </div>
+
             <div class="test-card-meta">
               <span>${UI_ICONS.time} ${t.turnaround_time || 'Same day'}</span>
               <span>${UI_ICONS.sample} ${t.sample_type || 'Blood'}</span>
@@ -270,9 +283,56 @@
           </div>
         `;
             }).join('');
+
+            // Wire up delegated listeners immediately after innerHTML set
+            attachCardEventListeners();
+
+            // After two paint frames the browser has measured layout — reveal clamped buttons
+            requestAnimationFrame(() => {
+                requestAnimationFrame(revealReadMoreButtons);
+            });
         }
 
-        // Filters
+        function revealReadMoreButtons() {
+            document.querySelectorAll('#allTestsGrid .test-card-desc').forEach(el => {
+                if (el.scrollHeight > el.clientHeight + 2) {
+                    const btn = el.nextElementSibling;
+                    if (btn && btn.classList.contains('btn-read-more')) {
+                        btn.style.display = 'inline-flex';
+                    }
+                }
+            });
+        }
+
+        function attachCardEventListeners() {
+            const grid = document.getElementById('allTestsGrid');
+            const fresh = grid.cloneNode(true);
+            grid.parentNode.replaceChild(fresh, grid);
+            const newGrid = document.getElementById('allTestsGrid');
+
+            newGrid.addEventListener('click', function(e) {
+                const cartBtn = e.target.closest('.btn-cart');
+                if (cartBtn && !cartBtn.disabled) {
+                    addToCart({
+                        id: cartBtn.dataset.id,
+                        itemType: cartBtn.dataset.itemType,
+                        name: cartBtn.dataset.name,
+                        category: cartBtn.dataset.category,
+                        price: cartBtn.dataset.price
+                    });
+                    return;
+                }
+
+                const readMoreBtn = e.target.closest('.btn-read-more');
+                if (readMoreBtn) {
+                    const testId = readMoreBtn.dataset.testId;
+                    const itemType = readMoreBtn.dataset.itemType;
+                    const test = allTests.find(t => String(t.id) === String(testId) && t.itemType === itemType);
+                    if (test) openTestModal(test);
+                }
+            });
+        }
+
         document.getElementById('searchInput').addEventListener('input', filterTests);
         document.getElementById('categoryFilter').addEventListener('change', filterTests);
         document.getElementById('sortFilter').addEventListener('change', filterTests);
@@ -293,6 +353,165 @@
             else filtered.sort((a, b) => a.name.localeCompare(b.name));
 
             renderTests(filtered);
+        }
+
+        let _modalKeyHandler = null;
+
+        function openTestModal(t) {
+            closeTestModal(true); 
+
+            const discount = t.original_price ? Math.round((1 - t.price / t.original_price) * 100) : 0;
+            const inCart = !!getCart().find(c => String(c.id) === String(t.id) && c.itemType === t.itemType);
+
+            let includesHtml = '';
+            if (t.itemType === 'package' && t.tests && t.tests.length > 0) {
+                includesHtml = `
+                <div class="test-modal-includes">
+                    <div class="test-modal-section-label">📦 Package Includes (${t.tests.length} Tests)</div>
+                    <div class="test-modal-includes-tags">
+                        ${t.tests.map(pt => `<span>${(pt.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`).join('')}
+                    </div>
+                </div>`;
+            }
+
+            const fastingHtml = t.fasting_required
+                ? `<div class="test-modal-fasting-tag">🍽️ Fasting Required (10–12 hours before the test)</div>`
+                : '';
+
+            const priceHtml = t.price ? `
+                <div class="test-modal-price-row">
+                    <span class="test-modal-price-current">₹${t.price}</span>
+                    ${t.original_price ? `<span class="test-modal-price-original">₹${t.original_price}</span>` : ''}
+                    ${discount > 0 ? `<span class="test-modal-price-discount">${discount}% OFF</span>` : ''}
+                </div>` : '';
+
+            const overlayEl = document.createElement('div');
+            overlayEl.className = 'test-modal-overlay';
+            overlayEl.id = 'testDetailModal';
+            overlayEl.setAttribute('role', 'dialog');
+            overlayEl.setAttribute('aria-modal', 'true');
+            overlayEl.setAttribute('aria-labelledby', 'testModalTitle');
+
+            const safeDesc = (t.description || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeName = (t.name || '').replace(/"/g, '&quot;');
+
+            overlayEl.innerHTML = `
+            <div class="test-modal-panel" id="testModalPanel">
+                <div class="test-modal-header">
+                    <div class="test-modal-header-info">
+                        <div class="test-modal-badge">${t.category}</div>
+                        <h2 class="test-modal-title" id="testModalTitle">${t.name}</h2>
+                    </div>
+                    <button class="test-modal-close" id="testModalCloseBtn" aria-label="Close modal">✕</button>
+                </div>
+
+                <div class="test-modal-body">
+                    ${fastingHtml}
+
+                    ${safeDesc ? `
+                    <div class="test-modal-section-label">About this Test</div>
+                    <p class="test-modal-description">${safeDesc}</p>
+                    ` : ''}
+
+                    ${priceHtml}
+
+                    <div class="test-modal-meta-grid">
+                        <div class="test-modal-meta-item">
+                            <span class="meta-label">Sample Type</span>
+                            <span class="meta-value">🧪 ${t.sample_type || 'Blood'}</span>
+                        </div>
+                        <div class="test-modal-meta-item">
+                            <span class="meta-label">Report Time</span>
+                            <span class="meta-value">🕐 ${t.turnaround_time || 'Same day'}</span>
+                        </div>
+                    </div>
+
+                    ${includesHtml}
+                </div>
+
+                <div class="test-modal-footer">
+                    <button class="test-modal-add-btn ${inCart ? 'added' : ''}"
+                        id="testModalAddBtn"
+                        data-id="${t.id}"
+                        data-item-type="${t.itemType}"
+                        data-name="${safeName}"
+                        data-category="${(t.category || '').replace(/"/g, '&quot;')}"
+                        data-price="${t.price}"
+                        ${inCart ? 'disabled' : ''}>
+                        ${inCart ? '✅ Already in Cart' : '🛒 Add to Cart'}
+                    </button>
+                </div>
+            </div>`;
+
+            document.body.appendChild(overlayEl);
+            document.body.style.overflow = 'hidden';
+
+            const closeBtn = document.getElementById('testModalCloseBtn');
+            closeBtn && setTimeout(() => closeBtn.focus(), 50);
+
+            closeBtn && closeBtn.addEventListener('click', () => closeTestModal());
+
+            overlayEl.addEventListener('click', e => {
+                if (e.target === overlayEl) closeTestModal();
+            });
+
+            const addBtn = document.getElementById('testModalAddBtn');
+            addBtn && addBtn.addEventListener('click', function() {
+                if (this.disabled) return;
+                addToCart({
+                    id: this.dataset.id,
+                    itemType: this.dataset.itemType,
+                    name: this.dataset.name,
+                    category: this.dataset.category,
+                    price: this.dataset.price
+                });
+                this.textContent = '✅ Already in Cart';
+                this.classList.add('added');
+                this.disabled = true;
+            });
+
+            overlayEl.addEventListener('keydown', trapFocus);
+            _modalKeyHandler = e => { if (e.key === 'Escape') closeTestModal(); };
+            document.addEventListener('keydown', _modalKeyHandler);
+        }
+
+        function closeTestModal(immediate) {
+            const overlay = document.getElementById('testDetailModal');
+            if (!overlay) return;
+
+            if (_modalKeyHandler) {
+                document.removeEventListener('keydown', _modalKeyHandler);
+                _modalKeyHandler = null;
+            }
+
+            if (immediate) {
+                overlay.remove();
+                document.body.style.overflow = '';
+                return;
+            }
+
+            overlay.classList.add('closing');
+            overlay.addEventListener('animationend', () => {
+                overlay.remove();
+                document.body.style.overflow = '';
+            }, { once: true });
+        }
+
+        function trapFocus(e) {
+            if (e.key !== 'Tab') return;
+            const modal = document.getElementById('testDetailModal');
+            if (!modal) return;
+            const focusable = Array.from(modal.querySelectorAll(
+                'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            )).filter(el => !el.closest('[hidden]'));
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey) {
+                if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+            } else {
+                if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
         }
     </script>
 </body>

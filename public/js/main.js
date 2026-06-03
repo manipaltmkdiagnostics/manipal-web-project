@@ -510,27 +510,59 @@ async function loadPopularTests() {
         }));
 
         packagesGrid.innerHTML = allPackages.map(p => createTestCard(p)).join('');
-        
+
         const popularTests = allTests.filter(t => t.is_popular);
         testsGrid.innerHTML = popularTests.slice(0, 10).map(t => createTestCard(t)).join('');
+
+        // Dynamically update category test counts on homepage
+        const catCounts = {};
+        [...allTests, ...allPackages].forEach(item => {
+            if (item.category) {
+                catCounts[item.category] = (catCounts[item.category] || 0) + 1;
+            }
+        });
+        document.querySelectorAll('.category-card').forEach(card => {
+            const catName = card.dataset.category;
+            const countEl = card.querySelector('.cat-count');
+            if (catName && countEl) {
+                const count = catCounts[catName] || 0;
+                if (catName === 'Health Package' || catName === 'Health Packages') {
+                    countEl.textContent = count + (count === 1 ? ' Package' : ' Packages');
+                } else {
+                    countEl.textContent = count + (count === 1 ? ' Test' : ' Tests');
+                }
+            }
+        });
 
         initScrollControls('categoriesScroll', 'categoriesScrollLeft', 'categoriesScrollRight');
         initScrollControls('packagesScroll', 'packagesScrollLeft', 'packagesScrollRight');
         initScrollControls('testsScroll', 'testsScrollLeft', 'testsScrollRight');
+
+        // Reveal "Read more" buttons after browser has painted and measured layout
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                revealReadMoreButtons('#packagesScroll');
+                revealReadMoreButtons('#testsScroll');
+            });
+        });
+
+        // Store tests data for modal lookup
+        _homeTestsCache = [...allTests, ...allPackages];
     } catch (err) {
         packagesGrid.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Failed to load packages</p>';
         testsGrid.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Failed to load tests</p>';
     }
 }
 
+/* ------ Shared: build a test/package card HTML string ------ */
 function createTestCard(t) {
     const discount = t.original_price ? Math.round((1 - t.price / t.original_price) * 100) : 0;
     const cart = getCart();
-    const inCart = cart.find(c => c.id === t.id && c.itemType === t.itemType);
-    
+    const inCart = cart.find(c => String(c.id) === String(t.id) && c.itemType === t.itemType);
+
     let watermark = '';
     if (t.itemType === 'package') {
-        watermark = `<div class="test-card-watermark" style="font-size:120px;opacity:0.04;display:flex;align-items:center;justify-content:center;height:100%;width:100%;">�Y"�</div>`;
+        watermark = `<div class="test-card-watermark" style="font-size:120px;opacity:0.04;display:flex;align-items:center;justify-content:center;height:100%;width:100%;">${UI_ICONS.package}</div>`;
     } else if (t.image_file) {
         watermark = `
             <div class="test-card-watermark" style="
@@ -541,19 +573,33 @@ function createTestCard(t) {
         `;
     }
 
+    const desc = (t.description || '').trim();
+    const safeDesc = desc.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
     return `
         <div class="test-card ${t.itemType === 'package' ? 'package-card' : ''}" style="${t.itemType === 'package' ? 'border-top: 4px solid var(--primary);' : ''}">
           ${watermark}
           <div class="test-card-header">
             <span class="test-card-badge" style="${t.itemType === 'package' ? 'background:var(--primary);color:white;' : ''}">${t.category}</span>
-            ${t.is_popular ? '<span style="color:var(--secondary);font-size:0.8rem;font-weight:600;">⭐ Popular</span>' : ''}
+            ${t.is_popular ? `<span style="color:var(--secondary);font-size:0.8rem;font-weight:600;">${UI_ICONS.popular} Popular</span>` : ''}
           </div>
           <h3>${t.name}</h3>
-          <p>${(t.description || '').substring(0, 100)}${(t.description || '').length > 100 ? '...' : ''}</p>
+          <div class="test-card-desc-wrap">
+            ${safeDesc ? `<p class="test-card-desc">${safeDesc}</p>
+            <button
+              class="btn-read-more"
+              data-test-id="${t.id}"
+              data-item-type="${t.itemType}"
+              aria-label="Read more about ${(t.name || '').replace(/"/g, '&quot;')}"
+              style="display:none;">
+              Read more
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>` : ''}
+          </div>
           <div class="test-card-meta">
-            <span>�Y.� ${t.turnaround_time || 'Same day'}</span>
-            <span>�Y�� ${t.sample_type || 'Blood'}</span>
-            ${t.fasting_required ? '<span>�Y��️ Fasting</span>' : ''}
+            <span>${UI_ICONS.time} ${t.turnaround_time || 'Same day'}</span>
+            <span>${UI_ICONS.sample} ${t.sample_type || 'Blood'}</span>
+            ${t.fasting_required ? `<span>${UI_ICONS.fasting} Fasting</span>` : ''}
           </div>
           <div class="test-card-footer">
             <div class="test-price">
@@ -568,13 +614,14 @@ function createTestCard(t) {
                   data-category="${(t.category || '').replace(/"/g, '&quot;')}"
                   data-price="${t.price}"
                   ${inCart ? 'disabled' : ''}>
-                  ${inCart ? '✅ Added' : '+ Add to Cart'}
+                  ${inCart ? `${UI_ICONS.check} Added` : '+ Add to Cart'}
               </button>
             </div>
           </div>
         </div>
     `;
 }
+
 
 /* ------ Scroll Controls ------ */
 function initScrollControls(containerId, leftBtnId, rightBtnId) {
@@ -725,70 +772,28 @@ async function loadPopularTests() {
         });
 
         packagesGrid.innerHTML = allPackages.map(p => createTestCard(p)).join('');
-        
+
         const popularTests = allTests.filter(t => t.is_popular);
         testsGrid.innerHTML = popularTests.slice(0, 10).map(t => createTestCard(t)).join('');
 
         initScrollControls('categoriesScroll', 'categoriesScrollLeft', 'categoriesScrollRight');
         initScrollControls('packagesScroll', 'packagesScrollLeft', 'packagesScrollRight');
         initScrollControls('testsScroll', 'testsScrollLeft', 'testsScrollRight');
+
+        // Reveal "Read more" buttons after browser has painted and measured layout
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                revealReadMoreButtons('#packagesScroll');
+                revealReadMoreButtons('#testsScroll');
+            });
+        });
+
+        // Store tests data for modal lookup
+        _homeTestsCache = [...allTests, ...allPackages];
     } catch (err) {
         packagesGrid.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Failed to load packages</p>';
         testsGrid.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Failed to load tests</p>';
     }
-}
-
-function createTestCard(t) {
-    const discount = t.original_price ? Math.round((1 - t.price / t.original_price) * 100) : 0;
-    const cart = getCart();
-    const inCart = cart.find(c => c.id === t.id && c.itemType === t.itemType);
-    
-    let watermark = '';
-    if (t.itemType === 'package') {
-        watermark = `<div class="test-card-watermark" style="font-size:120px;opacity:0.04;display:flex;align-items:center;justify-content:center;height:100%;width:100%;">${UI_ICONS.package}</div>`;
-    } else if (t.image_file) {
-        watermark = `
-            <div class="test-card-watermark" style="
-                background-image: url('/uploads/test-images/${t.image_file}');
-                width: ${t.image_standard_size ? '200px' : (t.image_max_width || 200) + 'px'};
-                height: ${t.image_standard_size ? '200px' : (t.image_max_height || 200) + 'px'};
-            "></div>
-        `;
-    }
-
-    return `
-        <div class="test-card ${t.itemType === 'package' ? 'package-card' : ''}" style="${t.itemType === 'package' ? 'border-top: 4px solid var(--primary);' : ''}">
-          ${watermark}
-          <div class="test-card-header">
-            <span class="test-card-badge" style="${t.itemType === 'package' ? 'background:var(--primary);color:white;' : ''}">${t.category}</span>
-            ${t.is_popular ? `<span style="color:var(--secondary);font-size:0.8rem;font-weight:600;">${UI_ICONS.popular} Popular</span>` : ''}
-          </div>
-          <h3>${t.name}</h3>
-          <p>${(t.description || '').substring(0, 100)}${(t.description || '').length > 100 ? '...' : ''}</p>
-          <div class="test-card-meta">
-            <span>${UI_ICONS.time} ${t.turnaround_time || 'Same day'}</span>
-            <span>${UI_ICONS.sample} ${t.sample_type || 'Blood'}</span>
-            ${t.fasting_required ? `<span>${UI_ICONS.fasting} Fasting</span>` : ''}
-          </div>
-          <div class="test-card-footer">
-            <div class="test-price">
-              <span class="current">₹${t.price}</span>
-              ${t.original_price ? `<span class="original">₹${t.original_price}</span>` : ''}
-              ${discount > 0 ? `<span class="discount">${discount}% OFF</span>` : ''}
-            </div>
-            <div class="test-card-actions">
-              <button class="btn-cart ${inCart ? 'added' : ''}" data-id="${t.id}"
-                  data-item-type="${t.itemType}"
-                  data-name="${(t.name || '').replace(/"/g, '&quot;')}"
-                  data-category="${(t.category || '').replace(/"/g, '&quot;')}"
-                  data-price="${t.price}"
-                  ${inCart ? 'disabled' : ''}>
-                  ${inCart ? `${UI_ICONS.check} Added` : '+ Add to Cart'}
-              </button>
-            </div>
-          </div>
-        </div>
-    `;
 }
 
 /* ------ Scroll Controls ------ */
@@ -799,7 +804,15 @@ function initScrollControls(containerId, leftBtnId, rightBtnId) {
 
     if (!container || !leftBtn || !rightBtn) return;
 
-    const scrollAmount = 340;
+    function getScrollAmount() {
+        const cards = container.children;
+        if (cards.length > 1) {
+            return cards[1].offsetLeft - cards[0].offsetLeft;
+        } else if (cards.length > 0) {
+            return cards[0].offsetWidth;
+        }
+        return 340;
+    }
 
     function updateArrows() {
         const { scrollLeft, scrollWidth, clientWidth } = container;
@@ -808,12 +821,12 @@ function initScrollControls(containerId, leftBtnId, rightBtnId) {
     }
 
     leftBtn.addEventListener('click', () => {
-        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        container.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
         setTimeout(updateArrows, 300);
     });
 
     rightBtn.addEventListener('click', () => {
-        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        container.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
         setTimeout(updateArrows, 300);
     });
 
@@ -821,7 +834,6 @@ function initScrollControls(containerId, leftBtnId, rightBtnId) {
     updateArrows();
 }
 
-/* ------ Gallery ------ */
 async function loadGallery() {
     const grid = document.getElementById('galleryGrid');
     if (!grid) return;
@@ -929,7 +941,7 @@ function showToast(message, type = 'success') {
 
 
 /* ===========================
-   EVENT DELEGATION FOR CART BUTTONS
+   EVENT DELEGATION FOR CART BUTTONS & READ-MORE
 =========================== */
 document.addEventListener('click', (e) => {
     // Handle "Add to Cart" button clicks
@@ -955,4 +967,200 @@ document.addEventListener('click', (e) => {
         if (removeId) removeFromCart(removeId, removeType);
         return;
     }
+
+    // Handle "Read more" button — open the test detail modal
+    const readMoreBtn = e.target.closest('.btn-read-more');
+    if (readMoreBtn) {
+        const testId = readMoreBtn.getAttribute('data-test-id');
+        const itemType = readMoreBtn.getAttribute('data-item-type');
+        const test = _homeTestsCache.find(
+            t => String(t.id) === String(testId) && t.itemType === itemType
+        );
+        if (test) openTestModal(test);
+        return;
+    }
 });
+
+/* ===========================
+   HOME PAGE TEST MODAL
+   (same modal used by tests.html; CSS is in style.css)
+=========================== */
+
+// Cache populated by loadPopularTests so modal can look up full test data
+let _homeTestsCache = [];
+let _homeModalKeyHandler = null;
+
+/* Show/hide "Read more" buttons where description is actually clamped */
+function revealReadMoreButtons(containerSelector) {
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
+    container.querySelectorAll('.test-card-desc').forEach(el => {
+        if (el.scrollHeight > el.clientHeight + 2) {
+            const btn = el.nextElementSibling;
+            if (btn && btn.classList.contains('btn-read-more')) {
+                btn.style.display = 'inline-flex';
+            }
+        }
+    });
+}
+
+function openTestModal(t) {
+    closeTestModal(true); // remove any stale modal
+
+    const discount = t.original_price ? Math.round((1 - t.price / t.original_price) * 100) : 0;
+    const inCart = !!getCart().find(c => String(c.id) === String(t.id) && c.itemType === t.itemType);
+
+    // Package includes
+    let includesHtml = '';
+    if (t.itemType === 'package' && t.tests && t.tests.length > 0) {
+        includesHtml = `
+        <div class="test-modal-includes">
+            <div class="test-modal-section-label">📦 Package Includes (${t.tests.length} Tests)</div>
+            <div class="test-modal-includes-tags">
+                ${t.tests.map(pt => `<span>${(pt.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`).join('')}
+            </div>
+        </div>`;
+    }
+
+    const fastingHtml = t.fasting_required
+        ? `<div class="test-modal-fasting-tag">🍽️ Fasting Required (10–12 hours before the test)</div>`
+        : '';
+
+    const priceHtml = t.price ? `
+        <div class="test-modal-price-row">
+            <span class="test-modal-price-current">₹${t.price}</span>
+            ${t.original_price ? `<span class="test-modal-price-original">₹${t.original_price}</span>` : ''}
+            ${discount > 0 ? `<span class="test-modal-price-discount">${discount}% OFF</span>` : ''}
+        </div>` : '';
+
+    const overlayEl = document.createElement('div');
+    overlayEl.className = 'test-modal-overlay';
+    overlayEl.id = 'testDetailModal';
+    overlayEl.setAttribute('role', 'dialog');
+    overlayEl.setAttribute('aria-modal', 'true');
+    overlayEl.setAttribute('aria-labelledby', 'testModalTitle');
+
+    const safeDesc = (t.description || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const safeName = (t.name || '').replace(/"/g, '&quot;');
+
+    overlayEl.innerHTML = `
+    <div class="test-modal-panel" id="testModalPanel">
+        <div class="test-modal-header">
+            <div class="test-modal-header-info">
+                <div class="test-modal-badge">${t.category}</div>
+                <h2 class="test-modal-title" id="testModalTitle">${t.name}</h2>
+            </div>
+            <button class="test-modal-close" id="testModalCloseBtn" aria-label="Close modal">✕</button>
+        </div>
+
+        <div class="test-modal-body">
+            ${fastingHtml}
+
+            ${safeDesc ? `
+            <div class="test-modal-section-label">About this Test</div>
+            <p class="test-modal-description">${safeDesc}</p>
+            ` : ''}
+
+            ${priceHtml}
+
+            <div class="test-modal-meta-grid">
+                <div class="test-modal-meta-item">
+                    <span class="meta-label">Sample Type</span>
+                    <span class="meta-value">🧪 ${t.sample_type || 'Blood'}</span>
+                </div>
+                <div class="test-modal-meta-item">
+                    <span class="meta-label">Report Time</span>
+                    <span class="meta-value">🕐 ${t.turnaround_time || 'Same day'}</span>
+                </div>
+            </div>
+
+            ${includesHtml}
+        </div>
+
+        <div class="test-modal-footer">
+            <button class="test-modal-add-btn ${inCart ? 'added' : ''}"
+                id="testModalAddBtn"
+                data-id="${t.id}"
+                data-item-type="${t.itemType}"
+                data-name="${safeName}"
+                data-category="${(t.category || '').replace(/"/g, '&quot;')}"
+                data-price="${t.price}"
+                ${inCart ? 'disabled' : ''}>
+                ${inCart ? '✅ Already in Cart' : '🛒 Add to Cart'}
+            </button>
+        </div>
+    </div>`;
+
+    document.body.appendChild(overlayEl);
+    document.body.style.overflow = 'hidden';
+
+    // Focus the close button
+    const closeBtn = document.getElementById('testModalCloseBtn');
+    closeBtn && setTimeout(() => closeBtn.focus(), 50);
+
+    // Close handlers
+    closeBtn && closeBtn.addEventListener('click', () => closeTestModal());
+    overlayEl.addEventListener('click', ev => {
+        if (ev.target === overlayEl) closeTestModal();
+    });
+
+    // Add to cart from inside modal
+    const addBtn = document.getElementById('testModalAddBtn');
+    addBtn && addBtn.addEventListener('click', function() {
+        if (this.disabled) return;
+        addToCart({
+            id: this.dataset.id,
+            itemType: this.dataset.itemType,
+            name: this.dataset.name,
+            category: this.dataset.category,
+            price: this.dataset.price
+        });
+        this.textContent = '✅ Already in Cart';
+        this.classList.add('added');
+        this.disabled = true;
+    });
+
+    // Focus trap + Escape key
+    overlayEl.addEventListener('keydown', _trapModalFocus);
+    _homeModalKeyHandler = ev => { if (ev.key === 'Escape') closeTestModal(); };
+    document.addEventListener('keydown', _homeModalKeyHandler);
+}
+
+function closeTestModal(immediate) {
+    const overlay = document.getElementById('testDetailModal');
+    if (!overlay) return;
+
+    if (_homeModalKeyHandler) {
+        document.removeEventListener('keydown', _homeModalKeyHandler);
+        _homeModalKeyHandler = null;
+    }
+
+    if (immediate) {
+        overlay.remove();
+        document.body.style.overflow = '';
+        return;
+    }
+
+    overlay.classList.add('closing');
+    overlay.addEventListener('animationend', () => {
+        overlay.remove();
+        document.body.style.overflow = '';
+    }, { once: true });
+}
+
+function _trapModalFocus(e) {
+    if (e.key !== 'Tab') return;
+    const modal = document.getElementById('testDetailModal');
+    if (!modal) return;
+    const focusable = Array.from(modal.querySelectorAll(
+        'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )).filter(el => !el.closest('[hidden]'));
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+}
