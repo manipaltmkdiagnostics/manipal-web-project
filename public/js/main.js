@@ -311,6 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPopularTests();
     loadGallery();
     initHeroSearch();
+    initHeroSlideshow();
     initStatCounters();
     initScrollControls('featuresScroll', 'featuresScrollLeft', 'featuresScrollRight');
     initScrollControls('categoriesScroll', 'categoriesScrollLeft', 'categoriesScrollRight');
@@ -319,6 +320,24 @@ document.addEventListener('DOMContentLoaded', () => {
     injectCartPanel();
     updateCartUI();
 });
+
+/* ------ Hero Background Slideshow ------ */
+function initHeroSlideshow() {
+    const slideshow = document.getElementById('heroSlideshow');
+    if (!slideshow) return;
+
+    const slides = slideshow.querySelectorAll('.hero-slide');
+    if (slides.length <= 1) return;
+
+    let currentSlide = 0;
+    const slideInterval = 3000; // 3 seconds per image
+
+    setInterval(() => {
+        slides[currentSlide].classList.remove('active');
+        currentSlide = (currentSlide + 1) % slides.length;
+        slides[currentSlide].classList.add('active');
+    }, slideInterval);
+}
 
 /* ------ Auth Button (Sign In / Sign Out) ------ */
 function initAuthButton() {

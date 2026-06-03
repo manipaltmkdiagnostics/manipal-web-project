@@ -11,6 +11,11 @@
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Preload Hero Slideshow Images -->
+    <link rel="preload" href="/images/home%20sample1.jpg" as="image">
+    <link rel="preload" href="/images/home%20sample2.jpg" as="image">
+    <link rel="preload" href="/images/home%20sample%203.png" as="image">
+    <link rel="preload" href="/images/home%20sample4.png" as="image">
 </head>
 
 <body>
@@ -72,7 +77,14 @@
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-watermark"></div>
+        <!-- Hero Background Slideshow Component -->
+        <div class="hero-slideshow" id="heroSlideshow">
+            <div class="hero-slide active" style="background-image: url('/images/home%20sample1.jpg');"></div>
+            <div class="hero-slide" style="background-image: url('/images/home%20sample2.jpg');"></div>
+            <div class="hero-slide" style="background-image: url('/images/home%20sample%203.png');"></div>
+            <div class="hero-slide" style="background-image: url('/images/home%20sample4.png');"></div>
+        </div>
+        <div class="hero-overlay"></div>
         <div class="container">
             <div class="hero-content">
                 <h1>Empowering Your Health<br>with <span>Accurate Diagnostics</span></h1>
@@ -435,6 +447,15 @@
             </div>
         </div>
     </section>
+    <!-- Home Sample Collection Floating Button -->
+    <a href="https://wa.me/919980080433?text=Hello%2C%20I%20would%20like%20to%20book%20a%20Home%20Sample%20Collection.%20Please%20provide%20details."
+       target="_blank" rel="noopener" class="home-collection-float" id="homeCollectionBtn"
+       aria-label="Book Home Sample Collection">
+        <img src="/images/home%20sample%20collection.png" alt="Home Sample Collection"
+             width="90" height="90" loading="lazy">
+        <span class="home-collection-tooltip">Book Home Sample Collection</span>
+    </a>
+
     <a href="https://wa.me/919980080433" target="_blank" rel="noopener" class="whatsapp-float"
         aria-label="Chat on WhatsApp">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="white" width="32" height="32">
