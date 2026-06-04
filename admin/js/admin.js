@@ -5,6 +5,7 @@
 const API = '';
 let currentUser = null;
 let token = null;
+let _bookingsCache = [];
 
 /* ------ Init ------ */
 document.addEventListener('DOMContentLoaded', () => {
@@ -177,22 +178,38 @@ async function loadBookings() {
         const tbody = document.getElementById('bookingsTable');
 
         if (bookings.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><div class="empty-icon">📅</div><h3>No bookings found</h3></td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><div class="empty-icon">📅</div><h3>No bookings found</h3></td></tr>';
             return;
         }
+
+        _bookingsCache = bookings;
 
         tbody.innerHTML = bookings.map(b => {
             const reportBtn = b.report_file
                 ? `<a href="/api/bookings/${b.id}/report" class="btn btn-sm btn-icon" title="Download Report" style="background:#E8F8F5;color:var(--primary);" target="_blank">📄</a>`
                 : '';
+
+            const isHome = b.homeCollection !== undefined ? b.homeCollection : b.home_collection;
+            const addressVal = b.homeAddress !== undefined ? b.homeAddress : b.address;
+
+            let addressCell = '—';
+            if (isHome) {
+                if (addressVal && addressVal.trim() !== '') {
+                    addressCell = `<button class="btn-address-link" onclick="viewAddress('${b.id}')">View Address</button>`;
+                } else {
+                    addressCell = 'N/A';
+                }
+            }
+
             return `
       <tr>
         <td>#${b.id}</td>
         <td><strong>${b.patient_name}</strong>${b.email ? `<br><small style="color:var(--text-muted)">${b.email}</small>` : ''}</td>
         <td>${b.phone}</td>
         <td>${b.test_name || '—'}</td>
-        <td>${b.preferred_date || '—'}<br><small style="color:var(--text-muted)">${b.preferred_time || ''}</small></td>
-        <td>${b.home_collection ? '🏠 Yes' : '🏥 No'}</td>
+        <td>${formatBookingDate(b)}</td>
+        <td>${isHome ? '🏠 Yes' : '🏥 No'}</td>
+        <td>${addressCell}</td>
         <td><span class="badge badge-${b.status}">${formatStatus(b.status)}</span></td>
         <td>
           ${reportBtn}
@@ -809,4 +826,44 @@ function formatStatus(status) {
         cancelled: 'Cancelled',
     };
     return map[status] || status;
+}
+
+function formatBookingDate(b) {
+    const dateVal = b.createdAt || b.created_at;
+    if (!dateVal) return 'Unknown';
+    try {
+        const date = new Date(dateVal);
+        if (isNaN(date.getTime())) return 'Unknown';
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;
+    } catch (e) {
+        return 'Unknown';
+    }
+}
+
+function viewAddress(id) {
+    const b = _bookingsCache.find(x => x.id === id);
+    if (!b) return;
+    
+    document.getElementById('addrPatientName').textContent = b.patient_name || '—';
+    document.getElementById('addrContactNumber').textContent = b.phone || '—';
+    
+    const addressVal = b.homeAddress !== undefined ? b.homeAddress : b.address;
+    document.getElementById('addrHomeAddress').textContent = addressVal || 'N/A';
+    
+    const linkVal = b.locationLink !== undefined ? b.locationLink : b.location_link;
+    const linkContainer = document.getElementById('addrLocationLink');
+    if (linkVal && linkVal.trim() !== '') {
+        let url = linkVal.trim();
+        if (!/^https?:\/\//i.test(url)) {
+            url = 'https://' + url;
+        }
+        linkContainer.innerHTML = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="btn-address-link" style="display:inline-flex; align-items:center; gap:6px; font-size:0.95rem;">🗺️ Open Location</a>`;
+    } else {
+        linkContainer.innerHTML = `<span style="color:var(--text-muted); font-size:0.9rem; font-style:italic;">No location provided</span>`;
+    }
+    
+    openModal('addressModal');
 }

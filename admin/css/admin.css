@@ -698,3 +698,21 @@ body {
 .empty-state p {
     font-size: 0.88rem;
 }
+
+/* --- View Address Button/Link --- */
+.btn-address-link {
+    background: none;
+    border: none;
+    color: #7B2CBF;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    font-size: 0.88rem;
+    transition: var(--transition);
+}
+
+.btn-address-link:hover {
+    color: #5a189a;
+}

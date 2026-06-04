@@ -17,7 +17,7 @@
         <div class="sidebar-brand">
             <div class="brand-icon">M</div>
             <div class="brand-text">
-                Manipal Tumkur<small>Admin Portal</small>
+                Manipal Tumkur Diagnostics<small>Admin Portal</small>
             </div>
         </div>
 
@@ -29,7 +29,8 @@
             <a href="#" data-section="bookings" onclick="showSection('bookings',this)">
                 <span class="nav-icon">📅</span> Bookings
             </a>
-            <a href="#" data-section="packages" onclick="showSection('packages',this)" id="navPackages" style="display:none;">
+            <a href="#" data-section="packages" onclick="showSection('packages',this)" id="navPackages"
+                style="display:none;">
                 <span class="nav-icon">📦</span> Health Packages
             </a>
 
@@ -190,15 +191,16 @@
                             <th>Patient</th>
                             <th>Phone</th>
                             <th>Test</th>
-                            <th>Date/Time</th>
+                            <th>Booking Date</th>
                             <th>Home</th>
+                            <th>Address</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="bookingsTable">
                         <tr>
-                            <td colspan="8" class="empty-state">
+                            <td colspan="9" class="empty-state">
                                 <p>Loading...</p>
                             </td>
                         </tr>
@@ -535,7 +537,8 @@
                 </div>
                 <div class="form-group">
                     <label>Select Tests *</label>
-                    <div id="packageTestsList" style="max-height: 200px; overflow-y: auto; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px;">
+                    <div id="packageTestsList"
+                        style="max-height: 200px; overflow-y: auto; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px;">
                         <!-- Tests checkboxes will be loaded here -->
                         <p style="color:var(--text-muted);font-size:0.9rem;">Loading tests...</p>
                     </div>
@@ -545,6 +548,37 @@
                     <button type="submit" class="btn btn-primary" id="packageSubmitBtn">Save Package</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Home Sample Collection Address Modal -->
+    <div class="modal-overlay" id="addressModal">
+        <div class="modal" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2>Home Sample Collection Details</h2>
+                <button class="modal-close" onclick="closeModal('addressModal')">×</button>
+            </div>
+            <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+                <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                    <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:600; display:block; margin-bottom:4px;">Patient Name</span>
+                    <span id="addrPatientName" style="font-weight:600; font-size:1rem; color:var(--text);"></span>
+                </div>
+                <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                    <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:600; display:block; margin-bottom:4px;">Contact Number</span>
+                    <span id="addrContactNumber" style="font-weight:600; font-size:1rem; color:var(--text);"></span>
+                </div>
+                <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+                    <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:600; display:block; margin-bottom:4px;">Home Address</span>
+                    <span id="addrHomeAddress" style="font-size:0.95rem; color:var(--text); line-height:1.5; display:block; white-space:pre-wrap;"></span>
+                </div>
+                <div>
+                    <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:600; display:block; margin-bottom:4px;">Google Maps Link</span>
+                    <span id="addrLocationLink"></span>
+                </div>
+            </div>
+            <div class="modal-actions" style="margin-top:20px; padding-top:12px;">
+                <button class="btn btn-secondary" onclick="closeModal('addressModal')">Close</button>
+            </div>
         </div>
     </div>
 

@@ -41,34 +41,72 @@ router.post('/', async (req, res) => {
     try {
         const {
             patient_name, phone, email, test_id, test_name,
-            preferred_date, preferred_time, home_collection,
-            address, location_link, notes,
+            preferred_date, preferred_time, home_collection, homeCollection,
+            address, homeAddress, location_link, locationLink, notes,
         } = req.body;
 
         if (!patient_name || !phone) {
             return res.status(400).json({ error: 'Patient name and phone are required' });
         }
 
-        const bookingData = {
-            patient_name,
-            phone,
-            email: email || '',
-            test_id: test_id || null,
-            test_name: test_name || '',
-            preferred_date: preferred_date || '',
-            preferred_time: preferred_time || '',
-            home_collection: home_collection ? true : false,
-            address: address || '',
-            location_link: location_link || '',
-            notes: notes || '',
-            status: 'pending',
-            report_file: null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-        };
+        const isHome = (homeCollection !== undefined ? homeCollection : home_collection) ? true : false;
+        const addrVal = (homeAddress !== undefined ? homeAddress : address) || '';
+        const linkVal = (locationLink !== undefined ? locationLink : location_link) || '';
 
-        const docRef = await db.collection('bookings').add(bookingData);
-        res.status(201).json({ id: docRef.id, ...bookingData });
+        const currentYear = new Date().getFullYear().toString();
+        const counterRef = db.collection('booking_counters').doc(currentYear);
+
+        let formattedId;
+        const nowStr = new Date().toISOString();
+        let bookingData;
+
+        await db.runTransaction(async (transaction) => {
+            const counterDoc = await transaction.get(counterRef);
+            let count = 1;
+            if (counterDoc.exists) {
+                const data = counterDoc.data();
+                if (data && typeof data.count === 'number') {
+                    count = data.count + 1;
+                }
+            }
+
+            const paddedCount = String(count).padStart(4, '0');
+            formattedId = `${currentYear}-${paddedCount}`;
+
+            bookingData = {
+                patient_name,
+                phone,
+                email: email || '',
+                test_id: test_id || null,
+                test_name: test_name || '',
+                preferred_date: preferred_date || '',
+                preferred_time: preferred_time || '',
+                notes: notes || '',
+                status: 'pending',
+                report_file: null,
+                
+                // Issue 1 address fields
+                homeCollection: isHome,
+                homeAddress: addrVal,
+                locationLink: linkVal,
+
+                home_collection: isHome,
+                address: addrVal,
+                location_link: linkVal,
+
+                // Issue 3 booking ID and creation fields
+                bookingId: formattedId,
+                createdAt: nowStr,
+                created_at: nowStr,
+                updated_at: nowStr,
+            };
+
+            const bookingRef = db.collection('bookings').doc(formattedId);
+            transaction.set(counterRef, { count });
+            transaction.set(bookingRef, bookingData);
+        });
+
+        res.status(201).json({ id: formattedId, ...bookingData });
     } catch (err) {
         console.error('POST /api/bookings error:', err);
         res.status(500).json({ error: 'Server error', detail: err.message });

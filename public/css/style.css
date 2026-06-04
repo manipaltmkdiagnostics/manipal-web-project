@@ -403,7 +403,7 @@ h6 {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
+  z-index: 10; /* Layer 2 (Middle) */
   pointer-events: none;
   overflow: hidden;
 }
@@ -424,7 +424,7 @@ h6 {
 }
 
 .hero-slide.active {
-  opacity: 0.5; /* Watermark opacity blending with the main hero background gradient */
+  opacity: 0.32; /* Desktop watermark opacity (Layer 2) */
   visibility: visible;
   transform: scale(1.05); /* Subtle Ken Burns zoom effect */
 }
@@ -435,26 +435,26 @@ h6 {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(37, 82, 214, 0.75); /* Desktop recommended overlay */
-  z-index: 2;
+  background: rgba(37, 82, 214, 0.55); /* Desktop bottom overlay (Layer 3) */
+  z-index: 1; /* Layer 3 (Bottom) */
   pointer-events: none;
 }
 
 @media (max-width: 1024px) {
   .hero-overlay {
-    background: rgba(37, 82, 214, 0.72); /* Tablet recommended overlay */
+    background: rgba(37, 82, 214, 0.50); /* Tablet overlay (Layer 3) */
   }
 }
 
 @media (max-width: 768px) {
   .hero-overlay {
-    background: rgba(37, 82, 214, 0.70); /* Mobile recommended overlay */
+    background: rgba(37, 82, 214, 0.45); /* Mobile overlay (Layer 3) */
   }
 }
 
 .hero .container {
   position: relative;
-  z-index: 3;
+  z-index: 30; /* Layer 1 (Top) */
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
   gap: clamp(24px, 4.5vw, 60px);
@@ -1639,10 +1639,13 @@ h6 {
   .hero-content h1 {
     font-size: 2.1rem;
   }
-
   .hero-content p {
     font-size: 0.95rem;
     margin-bottom: 24px;
+  }
+
+  .hero-slide.active {
+    opacity: 0.28;
   }
 
   .footer-grid {
@@ -1779,9 +1782,12 @@ h6 {
     padding: 10px 12px;
     font-size: 0.82rem;
   }
-
   .hero-content h1 {
     font-size: 2rem;
+  }
+
+  .hero-slide.active {
+    opacity: 0.24;
   }
 
   .section {
@@ -2640,11 +2646,9 @@ h6 {
   0% {
     box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
   }
-
   70% {
     box-shadow: 0 0 0 10px rgba(37, 211, 102, 0);
   }
-
   100% {
     box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
   }
@@ -2664,9 +2668,11 @@ h6 {
   justify-content: center;
   z-index: 1000;
   text-decoration: none;
-  transition: transform 0.3s ease, filter 0.3s ease;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.22));
-  animation: homeCollectionPulse 3s infinite ease-in-out;
+  border-radius: 50%;
+  border: 3px solid #7B2CBF; /* Purple Border Highlight */
+  padding: 2px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  animation: purplePulse 2.8s infinite ease-in-out;
   cursor: pointer;
 }
 
@@ -2674,12 +2680,15 @@ h6 {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  border-radius: 50%;
   pointer-events: none;
 }
 
 .home-collection-float:hover {
-  transform: scale(1.05);
-  filter: drop-shadow(0 8px 18px rgba(0, 80, 160, 0.4)) brightness(1.03);
+  transform: scale(1.08);
+  box-shadow: 0 0 30px rgba(123, 44, 191, 0.85);
+  border-color: #9D4EDD; /* Secondary Purple border on hover */
+  animation-play-state: paused;
 }
 
 /* Tooltip */
@@ -2704,6 +2713,20 @@ h6 {
   letter-spacing: 0.2px;
 }
 
+/* Purple Pulse Glow Animation */
+@keyframes purplePulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(123, 44, 191, 0);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 25px rgba(123, 44, 191, 0.6);
+  }
+}
+
+
+
 .home-collection-tooltip::after {
   content: '';
   position: absolute;
@@ -2720,17 +2743,18 @@ h6 {
   transform: translateX(-50%) translateY(0);
 }
 
-/* Subtle pulse animation */
-@keyframes homeCollectionPulse {
+/* Purple Pulse Glow Animation */
+@keyframes purplePulse {
   0%, 100% {
-    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.22));
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(123, 44, 191, 0);
   }
   50% {
-    filter: drop-shadow(0 4px 18px rgba(0, 80, 160, 0.45));
+    transform: scale(1.08);
+    box-shadow: 0 0 25px rgba(123, 44, 191, 0.6);
   }
 }
 
-/* Tablet */
 @media (min-width: 769px) and (max-width: 1024px) {
   .home-collection-float {
     bottom: 15px;
@@ -3218,5 +3242,324 @@ h6 {
 
   .top-bar svg, .top-bar i {
     transform: scale(0.85);
+  }
+}
+
+/* ==================================================
+   WELCOME BOOKING POPUP
+================================================== */
+.welcome-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 22, 40, 0.6);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.welcome-popup-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.welcome-popup-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(10, 22, 40, 0.25), 0 0 0 1px rgba(65, 105, 225, 0.05);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  transform: scale(0.9) translateY(30px);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  padding: 0;
+}
+
+.welcome-popup-overlay.active .welcome-popup-card {
+  transform: scale(1) translateY(0);
+}
+
+.welcome-popup-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.welcome-popup-close:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Header Section */
+.welcome-popup-header {
+  background: linear-gradient(135deg, #3B5BDB 0%, #7B2CBF 100%);
+  padding: 24px 28px;
+  color: #ffffff;
+  position: relative;
+  text-align: left;
+}
+
+.welcome-popup-brand {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.9;
+  margin-bottom: 6px;
+}
+
+.welcome-popup-header h2 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 6px;
+  color: #ffffff;
+}
+
+.welcome-popup-header p {
+  font-size: 0.88rem;
+  line-height: 1.4;
+  opacity: 0.95;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Form Styles */
+.welcome-popup-form {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+
+.welcome-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.welcome-form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.welcome-form-group input,
+.welcome-form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: #ffffff;
+}
+
+.welcome-form-group input:focus,
+.welcome-form-group textarea:focus {
+  outline: none;
+  border-color: #7B2CBF;
+  box-shadow: 0 0 0 3px rgba(123, 44, 191, 0.12);
+}
+
+/* Checkbox Style */
+.welcome-form-checkbox-group {
+  margin: 4px 0;
+}
+
+.welcome-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.welcome-checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #7B2CBF;
+  cursor: pointer;
+}
+
+/* Address transition and wrapper */
+.welcome-address-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+  animation: slideDownAddress 0.3s ease-out forwards;
+}
+
+@keyframes slideDownAddress {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome-helper-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+/* Actions Section */
+.welcome-form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn-welcome-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #3B5BDB 0%, #7B2CBF 100%);
+  color: #ffffff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(123, 44, 191, 0.25);
+  display: block;
+}
+
+.btn-welcome-primary:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.btn-welcome-primary:active {
+  transform: translateY(0);
+}
+
+.btn-welcome-secondary {
+  width: 100%;
+  background: #ffffff;
+  color: #7B2CBF;
+  border: 1.5px solid #7B2CBF;
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  display: block;
+}
+
+.btn-welcome-secondary:hover {
+  background: rgba(123, 44, 191, 0.05);
+}
+
+/* Success Flow Style */
+.welcome-popup-success {
+  padding: 40px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  animation: scaleUpSuccess 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes scaleUpSuccess {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.success-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(39, 174, 96, 0.1);
+  color: #27AE60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.success-icon-wrapper svg {
+  width: 32px;
+  height: 32px;
+}
+
+.welcome-popup-success h3 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #27AE60;
+}
+
+.welcome-popup-success p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.welcome-success-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* Responsiveness overrides */
+@media (max-width: 768px) {
+  .welcome-popup-card {
+    max-width: 90%;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-popup-card {
+    max-width: 95%;
+  }
+  .welcome-popup-header {
+    padding: 20px 24px;
+  }
+  .welcome-popup-form {
+    padding: 20px 24px;
   }
 }

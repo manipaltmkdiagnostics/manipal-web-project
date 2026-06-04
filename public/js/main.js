@@ -319,6 +319,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cart system
     injectCartPanel();
     updateCartUI();
+
+    // Welcome Popup
+    initWelcomePopup();
 });
 
 /* ------ Hero Background Slideshow ------ */
@@ -1182,4 +1185,155 @@ function _trapModalFocus(e) {
     } else {
         if (document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
+}
+
+/* ==================================================
+   WELCOME BOOKING POPUP LOGIC
+================================================== */
+function initWelcomePopup() {
+    const popup = document.getElementById('welcomePopup');
+    if (!popup) return;
+
+    // Show popup if not shown in current session
+    const isShown = sessionStorage.getItem('welcomePopupShown');
+    if (!isShown) {
+        // Delay popup emergence slightly for smooth landing feel
+        setTimeout(() => {
+            openWelcomePopup();
+            sessionStorage.setItem('welcomePopupShown', 'true');
+        }, 1200);
+    }
+
+    // Toggle address fields on checkbox click
+    const hcCheckbox = document.getElementById('welcomeHomeCollection');
+    const addressSection = document.getElementById('welcomeAddressSection');
+    const addressInput = document.getElementById('welcomeAddress');
+
+    if (hcCheckbox && addressSection) {
+        hcCheckbox.addEventListener('change', function () {
+            if (this.checked) {
+                addressSection.style.display = 'flex';
+                if (addressInput) addressInput.required = true;
+            } else {
+                addressSection.style.display = 'none';
+                if (addressInput) {
+                    addressInput.required = false;
+                    addressInput.value = '';
+                }
+                const locLink = document.getElementById('welcomeLocationLink');
+                if (locLink) locLink.value = '';
+            }
+        });
+    }
+
+    // Close buttons click events
+    const closeBtns = [
+        document.getElementById('closeWelcomePopupBtn'),
+        document.getElementById('welcomeCancelBtn'),
+        document.getElementById('welcomeSuccessCloseBtn')
+    ];
+
+    closeBtns.forEach(btn => {
+        if (btn) {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                closeWelcomePopup();
+            });
+        }
+    });
+
+    // Form Submission
+    const form = document.getElementById('welcomePopupForm');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('welcomePatientName').value.trim();
+            const phone = document.getElementById('welcomePhone').value.trim();
+            const homeCollection = hcCheckbox ? hcCheckbox.checked : false;
+            const address = homeCollection ? addressInput.value.trim() : '';
+            const locationLink = homeCollection ? document.getElementById('welcomeLocationLink').value.trim() : '';
+
+            // Validation
+            if (!name) {
+                showToast('Please enter patient name', 'error');
+                return;
+            }
+            if (!phone || !/^[0-9]{10}$/.test(phone)) {
+                showToast('Enter a valid 10-digit contact number', 'error');
+                return;
+            }
+            if (homeCollection && !address) {
+                showToast('Please enter your home address', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('welcomeSubmitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+            }
+
+            try {
+                const res = await fetch('/api/bookings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        patient_name: name,
+                        phone: phone,
+                        homeCollection: homeCollection,
+                        homeAddress: address,
+                        locationLink: locationLink
+                    })
+                });
+
+                if (res.ok) {
+                    // Show success state
+                    const formState = document.getElementById('welcomePopupFormState');
+                    const successState = document.getElementById('welcomePopupSuccessState');
+                    if (formState) formState.style.display = 'none';
+                    if (successState) successState.style.display = 'flex';
+
+                    // Auto close after 5 seconds
+                    setTimeout(() => {
+                        closeWelcomePopup();
+                    }, 5000);
+                } else {
+                    const err = await res.json();
+                    showToast(err.error || 'Failed to submit appointment request', 'error');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Book Appointment';
+                    }
+                }
+            } catch (err) {
+                showToast('Network error. Please check your connection.', 'error');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Book Appointment';
+                }
+            }
+        });
+    }
+}
+
+function openWelcomePopup() {
+    const popup = document.getElementById('welcomePopup');
+    if (!popup) return;
+    popup.style.display = 'flex';
+    // Small delay to trigger CSS transition
+    setTimeout(() => {
+        popup.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }, 50);
+}
+
+function closeWelcomePopup() {
+    const popup = document.getElementById('welcomePopup');
+    if (!popup) return;
+    popup.classList.remove('active');
+    document.body.style.overflow = ''; // Restore scroll
+    setTimeout(() => {
+        popup.style.display = 'none';
+    }, 300);
 }
