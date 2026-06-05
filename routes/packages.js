@@ -158,6 +158,7 @@ router.get('/', async (req, res) => {
 // POST /api/health-packages — master admin only
 router.post('/', authenticateToken, requireRole('master'), async (req, res) => {
     try {
+        console.log('Creating package...');
         const { name, description, price, testIds } = req.body;
 
         if (!name || !price || !Array.isArray(testIds) || testIds.length === 0) {
@@ -174,6 +175,7 @@ router.post('/', authenticateToken, requireRole('master'), async (req, res) => {
         };
 
         const docRef = await db.collection('health_packages').add(packageData);
+        console.log('Package created successfully');
         console.log(`[POST /api/health-packages] Saved package "${packageData.name}" with ID: ${docRef.id}, testIds: ${JSON.stringify(packageData.testIds)}`);
         res.status(201).json({ id: docRef.id, ...packageData });
     } catch (err) {
@@ -185,6 +187,7 @@ router.post('/', authenticateToken, requireRole('master'), async (req, res) => {
 // PUT /api/health-packages/:id — master admin only
 router.put('/:id', authenticateToken, requireRole('master'), async (req, res) => {
     try {
+        console.log('Updating package...');
         const { id } = req.params;
         const { name, description, price, testIds } = req.body;
 
@@ -198,9 +201,12 @@ router.put('/:id', authenticateToken, requireRole('master'), async (req, res) =>
             description: description !== undefined ? description : current.description,
             price: price !== undefined ? parseFloat(price) : current.price,
         };
-        if (Array.isArray(testIds)) updates.testIds = testIds;
+        if (Array.isArray(testIds)) {
+            updates.testIds = [...new Set(testIds.filter(tid => tid && typeof tid === 'string' && tid.trim() !== ''))];
+        }
 
         await docRef.update(updates);
+        console.log('Package updated successfully');
         const updated = await docRef.get();
         res.json({ id: updated.id, ...updated.data() });
     } catch (err) {
@@ -209,15 +215,17 @@ router.put('/:id', authenticateToken, requireRole('master'), async (req, res) =>
     }
 });
 
-// DELETE /api/health-packages/:id — soft delete, master admin only
+// DELETE /api/health-packages/:id — hard delete, master admin only
 router.delete('/:id', authenticateToken, requireRole('master'), async (req, res) => {
     try {
+        console.log('Deleting package...');
         const { id } = req.params;
         const docRef = db.collection('health_packages').doc(id);
         const existing = await docRef.get();
         if (!existing.exists) return res.status(404).json({ error: 'Package not found' });
 
-        await docRef.update({ is_active: false });
+        await docRef.delete();
+        console.log('Package deleted successfully');
         res.json({ message: 'Package deleted successfully' });
     } catch (err) {
         console.error('DELETE /api/health-packages/:id error:', err);

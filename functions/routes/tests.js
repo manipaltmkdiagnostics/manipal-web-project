@@ -104,6 +104,7 @@ router.get('/categories', async (req, res) => {
 // POST /api/tests — master admin only
 router.post('/', authenticateToken, requireRole('master'), upload.single('image'), async (req, res) => {
     try {
+        console.log('Creating test...');
         const {
             name,
             category,
@@ -147,6 +148,7 @@ router.post('/', authenticateToken, requireRole('master'), upload.single('image'
         };
 
         const docRef = await db.collection('tests').add(testData);
+        console.log('Test created successfully');
         console.log(`[POST /api/tests] Saved test "${testData.name}" with ID: ${docRef.id}`);
         res.status(201).json({ id: docRef.id, ...testData });
     } catch (err) {
@@ -158,6 +160,7 @@ router.post('/', authenticateToken, requireRole('master'), upload.single('image'
 // PUT /api/tests/:id — master admin only
 router.put('/:id', authenticateToken, requireRole('master'), upload.single('image'), async (req, res) => {
     try {
+        console.log('Updating test...');
         const id = req.params.id;
         const docRef = db.collection('tests').doc(id);
         const existing = await docRef.get();
@@ -231,6 +234,7 @@ router.put('/:id', authenticateToken, requireRole('master'), upload.single('imag
         };
 
         await docRef.update(updates);
+        console.log('Test updated successfully');
         const updated = await docRef.get();
         res.json({ id: updated.id, ...updated.data() });
     } catch (err) {
@@ -239,16 +243,28 @@ router.put('/:id', authenticateToken, requireRole('master'), upload.single('imag
     }
 });
 
-// DELETE /api/tests/:id — soft delete, master admin only
+// DELETE /api/tests/:id — hard delete, master admin only
 router.delete('/:id', authenticateToken, requireRole('master'), async (req, res) => {
     try {
+        console.log('Deleting test...');
         const id = req.params.id;
         const docRef = db.collection('tests').doc(id);
         const existing = await docRef.get();
 
         if (!existing.exists) return res.status(404).json({ error: 'Test not found' });
 
-        await docRef.update({ is_active: false });
+        // Safely scan all packages in health_packages and remove the deleted test ID reference
+        const packagesSnapshot = await db.collection('health_packages').get();
+        for (const pkgDoc of packagesSnapshot.docs) {
+            const data = pkgDoc.data();
+            if (Array.isArray(data.testIds) && data.testIds.includes(id)) {
+                const updatedIds = data.testIds.filter(tid => tid !== id);
+                await pkgDoc.ref.update({ testIds: updatedIds });
+            }
+        }
+
+        await docRef.delete();
+        console.log('Test deleted successfully');
         res.json({ message: 'Test deleted successfully' });
     } catch (err) {
         console.error('DELETE /api/tests/:id error:', err);

@@ -358,13 +358,13 @@ function removeTestImage() {
 }
 
 async function deleteTest(id) {
-    if (!confirm('Delete this test? This will soft-delete it from the public listing.')) return;
+    if (!confirm("Delete Test?\n\nThis action cannot be undone.")) return;
     try {
         await apiFetch(`/api/tests/${id}`, { method: 'DELETE', headers: authHeaders() });
         showToast('Test deleted');
         loadTests();
     } catch (err) {
-        showToast('Delete failed', 'error');
+        showToast('Operation failed. Please try again.', 'error');
     }
 }
 
@@ -407,7 +407,7 @@ async function loadPackages() {
         </td>
         <td style="font-weight:700;color:var(--primary);">₹${p.price}</td>
         <td>
-          <button class="btn btn-primary btn-sm btn-icon" onclick='editPackage(${JSON.stringify(p).replace(/'/g, "\\'")})'>✏️</button>
+          <button class="btn btn-primary btn-sm btn-icon" onclick="editPackage('${p.id}')">✏️</button>
           <button class="btn btn-danger btn-sm btn-icon" onclick="deletePackage('${p.id}')">🗑️</button>
         </td>
       </tr>
@@ -451,7 +451,16 @@ async function openPackageModal() {
     openModal('packageModal');
 }
 
-async function editPackage(pkg) {
+async function editPackage(id) {
+    const pkg = _packagesCache.find(p => p.id === id);
+    if (!pkg) {
+        console.error("Package not found in cache for ID:", id);
+        return;
+    }
+    console.log("Edit button clicked");
+    console.log("Package ID:", id);
+    console.log("Package Data:", pkg);
+
     document.getElementById('packageModalTitle').textContent = 'Edit Health Package';
     document.getElementById('packageSubmitBtn').textContent = 'Update Package';
     document.getElementById('packageId').value = pkg.id;
@@ -488,13 +497,33 @@ async function editPackage(pkg) {
 }
 
 async function deletePackage(id) {
-    if (!confirm('Delete this health package?')) return;
+    if (!confirm("Delete Health Package?\n\nThis action cannot be undone.")) return;
+    const package = _packagesCache.find(p => p.id === id);
+    console.log(
+        "Deleting package",
+        package
+    );
+    console.log(
+        "Firestore Document ID",
+        package.id
+    );
     try {
-        await apiFetch(`/api/health-packages/${id}`, { method: 'DELETE', headers: authHeaders() });
+        const res = await apiFetch(`/api/health-packages/${id}`, { method: 'DELETE', headers: authHeaders() });
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.error || 'Delete failed');
+        }
+        console.log(
+            "Package deleted successfully"
+        );
         showToast('Package deleted');
         loadPackages();
-    } catch (err) {
-        showToast('Delete failed', 'error');
+    } catch (error) {
+        console.error(
+            "Delete failed",
+            error
+        );
+        showToast('Operation failed. Please try again.', 'error');
     }
 }
 
@@ -668,10 +697,10 @@ function setupForms() {
                 loadTests();
             } else {
                 const err = await res.json();
-                showToast(err.error || 'Failed', 'error');
+                showToast(err.error || 'Operation failed. Please try again.', 'error');
             }
         } catch (err) {
-            showToast('Error saving test', 'error');
+            showToast('Operation failed. Please try again.', 'error');
         }
     });
 
@@ -789,16 +818,19 @@ function setupForms() {
         const id = document.getElementById('packageId').value;
         const testIds = Array.from(_packageSelectedTestIds);
         
-        if (testIds.length === 0) {
+        // Sanitize and validate testIds array
+        const sanitizedTestIds = [...new Set(testIds.filter(tid => tid && typeof tid === 'string' && tid.trim() !== ''))];
+        
+        if (sanitizedTestIds.length === 0) {
             showToast('Please select at least one test', 'error');
             return;
         }
 
         const data = {
-            name: document.getElementById('packageName').value,
-            description: document.getElementById('packageDescription').value,
-            price: document.getElementById('packagePrice').value,
-            testIds: testIds
+            name: document.getElementById('packageName').value.trim(),
+            description: document.getElementById('packageDescription').value.trim(),
+            price: parseFloat(document.getElementById('packagePrice').value),
+            testIds: sanitizedTestIds
         };
 
         try {
@@ -815,12 +847,16 @@ function setupForms() {
                 closeModal('packageModal');
                 loadPackages();
             } else {
-                const err = await res.json();
-                showToast(err.error || 'Failed', 'error');
+                const err = await res.json().catch(() => ({}));
+                const errMsg = id ? 'Failed to update package. Please try again.' : (err.error || 'Operation failed. Please try again.');
+                const errorObj = new Error(err.error || errMsg);
+                console.error(errorObj);
+                showToast(errMsg, 'error');
             }
-        } catch (err) {
-            console.error('Package save error:', err);
-            showToast('Error saving package', 'error');
+        } catch (error) {
+            console.error(error);
+            const errMsg = id ? 'Failed to update package. Please try again.' : 'Operation failed. Please try again.';
+            showToast(errMsg, 'error');
         }
     });
 }
