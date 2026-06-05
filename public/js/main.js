@@ -1035,13 +1035,25 @@ function openTestModal(t) {
     // Package includes
     let includesHtml = '';
     if (t.itemType === 'package' && t.tests && t.tests.length > 0) {
+        window._activeModalPackageTests = t.tests;
         includesHtml = `
         <div class="test-modal-includes">
-            <div class="test-modal-section-label">📦 Package Includes (${t.tests.length} Tests)</div>
-            <div class="test-modal-includes-tags">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div class="test-modal-section-label" style="margin-bottom:0;">📦 Package Includes (${t.tests.length} Tests)</div>
+                <span id="pkgIncludesShowCount" style="font-size:0.75rem; font-weight:600; color:var(--text-muted);">Showing ${t.tests.length} of ${t.tests.length} tests</span>
+            </div>
+            <input type="text" id="pkgIncludesSearch" placeholder="🔍 Search tests in this package..."
+                class="pkg-includes-search-input"
+                oninput="filterPackageIncludesTests()">
+            <div class="test-modal-includes-tags" id="pkgIncludesTags">
                 ${t.tests.map(pt => `<span>${(pt.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`).join('')}
             </div>
+            <div id="pkgIncludesNoResults" style="display:none; color:var(--text-muted); font-size:0.9rem; padding:10px 0; text-align:center; font-style:italic;">
+                ❌ No matching test found in this package.
+            </div>
         </div>`;
+    } else {
+        window._activeModalPackageTests = [];
     }
 
     const fastingHtml = t.fasting_required
@@ -1336,4 +1348,37 @@ function closeWelcomePopup() {
     setTimeout(() => {
         popup.style.display = 'none';
     }, 300);
+}
+
+function filterPackageIncludesTests() {
+    const query = (document.getElementById('pkgIncludesSearch')?.value || '').trim().toLowerCase();
+    const tests = window._activeModalPackageTests || [];
+    const tagsContainer = document.getElementById('pkgIncludesTags');
+    const noResultsEl = document.getElementById('pkgIncludesNoResults');
+    const showCountEl = document.getElementById('pkgIncludesShowCount');
+    if (!tagsContainer) return;
+    
+    let visibleCount = 0;
+    const items = tagsContainer.getElementsByTagName('span');
+    
+    for (let i = 0; i < tests.length; i++) {
+        if (!items[i]) continue;
+        const testName = (tests[i].name || '').toLowerCase();
+        const matches = testName.includes(query);
+        
+        if (matches) {
+            items[i].style.display = '';
+            visibleCount++;
+        } else {
+            items[i].style.display = 'none';
+        }
+    }
+    
+    if (noResultsEl) {
+        noResultsEl.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+    
+    if (showCountEl) {
+        showCountEl.textContent = `Showing ${visibleCount} of ${tests.length} tests`;
+    }
 }

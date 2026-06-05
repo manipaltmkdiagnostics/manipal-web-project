@@ -3167,6 +3167,24 @@ h6 {
   margin-bottom: 22px;
 }
 
+.pkg-includes-search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+  font-size: 0.88rem;
+  outline: none;
+  background: var(--bg-alt);
+  font-family: inherit;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.pkg-includes-search-input:focus {
+  border-color: var(--primary);
+  background: white;
+}
+
 .test-modal-includes-tags {
   display: flex;
   flex-wrap: wrap;

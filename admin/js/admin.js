@@ -6,6 +6,10 @@ const API = '';
 let currentUser = null;
 let token = null;
 let _bookingsCache = [];
+let _testsCache = [];
+let _packageAllTests = [];
+let _packageSelectedTestIds = new Set();
+let _packagesCache = [];
 
 /* ------ Init ------ */
 document.addEventListener('DOMContentLoaded', () => {
@@ -287,27 +291,12 @@ async function loadTests() {
     try {
         const res = await apiFetch('/api/tests', { headers: authHeaders() });
         const tests = await res.json();
-        const tbody = document.getElementById('testsTable');
-
-        if (tests.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon">🧪</div><h3>No tests yet</h3></td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = tests.map(t => `
-      <tr>
-        <td><strong>${t.name}</strong><br><small style="color:var(--text-muted)">${(t.description || '').substring(0, 50)}...</small></td>
-        <td><span class="badge badge-admin">${t.category}</span></td>
-        <td style="font-weight:700;color:var(--primary);">₹${t.price}</td>
-        <td style="color:var(--text-muted);text-decoration:line-through;">${t.original_price ? '₹' + t.original_price : '—'}</td>
-        <td>${t.turnaround_time || '—'}</td>
-        <td>${t.is_popular ? '⭐ Yes' : 'No'}</td>
-        <td>
-          <button class="btn btn-primary btn-sm btn-icon" onclick='editTest(${JSON.stringify(t).replace(/'/g, "\\'")})'>✏️</button>
-          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteTest('${t.id}')">🗑️</button>
-        </td>
-      </tr>
-    `).join('');
+        
+        _testsCache = tests;
+        const searchEl = document.getElementById('testManagerSearch');
+        if (searchEl) searchEl.value = '';
+        
+        filterTestManagerTable();
     } catch (err) {
         console.error('Tests load failed:', err);
     }
@@ -386,6 +375,7 @@ async function loadPackages() {
     try {
         const res = await apiFetch('/api/health-packages', { headers: authHeaders() });
         const packages = await res.json();
+        _packagesCache = packages;
         const tbody = document.getElementById('packagesTable');
 
         if (packages.length === 0) {
@@ -393,13 +383,26 @@ async function loadPackages() {
             return;
         }
 
-        tbody.innerHTML = packages.map(p => `
+        tbody.innerHTML = packages.map(p => {
+            const allTests = p.tests || [];
+            let testsHtml = '';
+            
+            if (allTests.length <= 6) {
+                testsHtml = allTests.map(t => `<span class="badge badge-admin" style="margin-right:4px;margin-bottom:4px;">${t.name}</span>`).join('');
+            } else {
+                const visible = allTests.slice(0, 5);
+                const remaining = allTests.length - 5;
+                const visibleBadges = visible.map(t => `<span class="badge badge-admin" style="margin-right:4px;margin-bottom:4px;">${t.name}</span>`).join('');
+                testsHtml = `${visibleBadges}<button class="btn-read-more-tests" onclick="showPackageTests('${p.id}')">+${remaining} More Tests</button>`;
+            }
+
+            return `
       <tr>
         <td><strong>${p.name}</strong></td>
         <td><small style="color:var(--text-muted)">${p.description || '—'}</small></td>
         <td>
             <div style="font-size:0.85rem;">
-                ${(p.tests || []).map(t => `<span class="badge badge-admin" style="margin-right:4px;margin-bottom:4px;">${t.name}</span>`).join('')}
+                ${testsHtml}
             </div>
         </td>
         <td style="font-weight:700;color:var(--primary);">₹${p.price}</td>
@@ -408,7 +411,8 @@ async function loadPackages() {
           <button class="btn btn-danger btn-sm btn-icon" onclick="deletePackage('${p.id}')">🗑️</button>
         </td>
       </tr>
-    `).join('');
+    `;
+        }).join('');
     } catch (err) {
         console.error('Packages load failed:', err);
     }
@@ -420,25 +424,26 @@ async function openPackageModal() {
     document.getElementById('packageForm').reset();
     document.getElementById('packageId').value = '';
     
-    // Load tests for selection
+    const searchInput = document.getElementById('packageTestSearch');
+    if (searchInput) searchInput.value = '';
+    
+    _packageSelectedTestIds.clear();
+    updatePackageSelectedCount();
+    
     const testsList = document.getElementById('packageTestsList');
     testsList.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">Loading tests...</p>';
     
     try {
         const res = await apiFetch('/api/tests', { headers: authHeaders() });
         const tests = await res.json();
+        _packageAllTests = tests;
         
-        if (tests.length === 0) {
+        if (_packageAllTests.length === 0) {
             testsList.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">No tests available. Please add tests first.</p>';
             return;
         }
         
-        testsList.innerHTML = tests.map(t => `
-            <label style="display:flex;align-items:center;gap:10px;padding:6px;cursor:pointer;border-bottom:1px solid var(--border-light);">
-                <input type="checkbox" name="packageTests" value="${t.id}" style="width:16px;height:16px;accent-color:var(--primary);">
-                <span style="font-size:0.9rem;">${t.name} (₹${t.price})</span>
-            </label>
-        `).join('');
+        renderPackageTestsList(_packageAllTests);
     } catch (err) {
         testsList.innerHTML = '<p style="color:var(--danger);font-size:0.9rem;">Failed to load tests.</p>';
     }
@@ -454,21 +459,27 @@ async function editPackage(pkg) {
     document.getElementById('packageDescription').value = pkg.description || '';
     document.getElementById('packagePrice').value = pkg.price;
     
-    // Load tests and check selected ones
+    const searchInput = document.getElementById('packageTestSearch');
+    if (searchInput) searchInput.value = '';
+    
+    const selectedIds = (pkg.tests || []).map(t => String(t.id));
+    _packageSelectedTestIds = new Set(selectedIds);
+    updatePackageSelectedCount();
+    
     const testsList = document.getElementById('packageTestsList');
     testsList.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">Loading tests...</p>';
     
     try {
         const res = await apiFetch('/api/tests', { headers: authHeaders() });
         const tests = await res.json();
-        const selectedIds = (pkg.tests || []).map(t => t.id);
+        _packageAllTests = tests;
         
-        testsList.innerHTML = tests.map(t => `
-            <label style="display:flex;align-items:center;gap:10px;padding:6px;cursor:pointer;border-bottom:1px solid var(--border-light);">
-                <input type="checkbox" name="packageTests" value="${t.id}" ${selectedIds.includes(t.id) ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--primary);">
-                <span style="font-size:0.9rem;">${t.name} (₹${t.price})</span>
-            </label>
-        `).join('');
+        if (_packageAllTests.length === 0) {
+            testsList.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">No tests available. Please add tests first.</p>';
+            return;
+        }
+        
+        renderPackageTestsList(_packageAllTests);
     } catch (err) {
         testsList.innerHTML = '<p style="color:var(--danger);font-size:0.9rem;">Failed to load tests.</p>';
     }
@@ -776,8 +787,7 @@ function setupForms() {
     document.getElementById('packageForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('packageId').value;
-        const testCheckboxes = document.querySelectorAll('input[name="packageTests"]:checked');
-        const testIds = Array.from(testCheckboxes).map(cb => parseInt(cb.value));
+        const testIds = Array.from(_packageSelectedTestIds);
         
         if (testIds.length === 0) {
             showToast('Please select at least one test', 'error');
@@ -866,4 +876,90 @@ function viewAddress(id) {
     }
     
     openModal('addressModal');
+}
+
+function filterTestManagerTable() {
+    const query = (document.getElementById('testManagerSearch')?.value || '').trim().toLowerCase();
+    const filtered = _testsCache.filter(t => (t.name || '').toLowerCase().includes(query));
+    const tbody = document.getElementById('testsTable');
+    if (!tbody) return;
+    
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><div class="empty-icon">🧪</div><h3>${_testsCache.length === 0 ? 'No tests yet' : 'No matching tests found'}</h3></td></tr>`;
+        return;
+    }
+    
+    tbody.innerHTML = filtered.map(t => `
+      <tr>
+        <td><strong>${t.name}</strong><br><small style="color:var(--text-muted)">${(t.description || '').substring(0, 50)}...</small></td>
+        <td><span class="badge badge-admin">${t.category}</span></td>
+        <td style="font-weight:700;color:var(--primary);">₹${t.price}</td>
+        <td style="color:var(--text-muted);text-decoration:line-through;">${t.original_price ? '₹' + t.original_price : '—'}</td>
+        <td>${t.turnaround_time || '—'}</td>
+        <td>${t.is_popular ? '⭐ Yes' : 'No'}</td>
+        <td>
+          <button class="btn btn-primary btn-sm btn-icon" onclick='editTest(${JSON.stringify(t).replace(/'/g, "\\'")})'>✏️</button>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteTest('${t.id}')">🗑️</button>
+        </td>
+      </tr>
+    `).join('');
+}
+
+function togglePackageTestSelection(id, checked) {
+    if (checked) {
+        _packageSelectedTestIds.add(id);
+    } else {
+        _packageSelectedTestIds.delete(id);
+    }
+    updatePackageSelectedCount();
+}
+
+function updatePackageSelectedCount() {
+    const el = document.getElementById('packageTestsSelectedCount');
+    if (el) {
+        el.textContent = `Selected: ${_packageSelectedTestIds.size}`;
+    }
+}
+
+function filterPackageTests() {
+    const query = (document.getElementById('packageTestSearch')?.value || '').trim().toLowerCase();
+    const filtered = _packageAllTests.filter(t => (t.name || '').toLowerCase().includes(query));
+    renderPackageTestsList(filtered);
+}
+
+function renderPackageTestsList(testsToRender) {
+    const testsList = document.getElementById('packageTestsList');
+    if (!testsList) return;
+    
+    if (testsToRender.length === 0) {
+        testsList.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;padding:6px;">No matching tests found.</p>';
+        return;
+    }
+    
+    testsList.innerHTML = testsToRender.map(t => `
+        <label style="display:flex;align-items:center;gap:10px;padding:6px;cursor:pointer;border-bottom:1px solid var(--border-light);">
+            <input type="checkbox" name="packageTests" value="${t.id}" 
+                ${_packageSelectedTestIds.has(t.id) ? 'checked' : ''} 
+                onchange="togglePackageTestSelection('${t.id}', this.checked)"
+                style="width:16px;height:16px;accent-color:var(--primary);">
+            <span style="font-size:0.9rem;">${t.name} (₹${t.price})</span>
+        </label>
+    `).join('');
+}
+
+function showPackageTests(packageId) {
+    const pkg = _packagesCache.find(p => p.id === packageId);
+    if (!pkg) return;
+    
+    document.getElementById('pkgTestsModalTitle').textContent = pkg.name;
+    document.getElementById('pkgTestsCountBadge').textContent = `${(pkg.tests || []).length} Tests Included`;
+    
+    const listEl = document.getElementById('pkgTestsModalList');
+    if (listEl) {
+        listEl.innerHTML = (pkg.tests || []).map(t => `
+            <span class="badge badge-admin" style="margin-right:4px;margin-bottom:4px;font-size:0.85rem;padding:6px 10px;">${t.name}</span>
+        `).join('');
+    }
+    
+    openModal('packageTestsModal');
 }

@@ -218,6 +218,12 @@
                 </div>
             </div>
 
+            <div style="margin-bottom: 16px; max-width: 400px;">
+                <input type="text" id="testManagerSearch" placeholder="🔍 Search tests by name..."
+                    style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-family: Inter; font-size: 0.88rem; outline: none; transition: border-color 0.2s;"
+                    oninput="filterTestManagerTable()">
+            </div>
+
             <div class="data-card">
                 <table class="data-table">
                     <thead>
@@ -535,8 +541,14 @@
                     <label>Total Price (₹) *</label>
                     <input type="number" id="packagePrice" required min="0" step="0.01">
                 </div>
-                <div class="form-group">
-                    <label>Select Tests *</label>
+                 <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label style="margin-bottom:0;">Select Tests *</label>
+                        <span id="packageTestsSelectedCount" style="font-size:0.8rem; font-weight:600; color:var(--primary);">Selected: 0</span>
+                    </div>
+                    <input type="text" id="packageTestSearch" placeholder="🔍 Search tests by name..."
+                        style="width: 100%; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px; margin-bottom: 8px; font-size: 0.85rem; outline: none; transition: border-color 0.2s;"
+                        oninput="filterPackageTests()">
                     <div id="packageTestsList"
                         style="max-height: 200px; overflow-y: auto; border: 1.5px solid var(--border); border-radius: 8px; padding: 10px;">
                         <!-- Tests checkboxes will be loaded here -->
@@ -578,6 +590,27 @@
             </div>
             <div class="modal-actions" style="margin-top:20px; padding-top:12px;">
                 <button class="btn btn-secondary" onclick="closeModal('addressModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Package Tests Detail Modal -->
+    <div class="modal-overlay" id="packageTestsModal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <div>
+                    <h2 id="pkgTestsModalTitle" style="margin-bottom: 6px; font-size: 1.25rem;">Package Name</h2>
+                    <span id="pkgTestsCountBadge" style="font-size: 0.78rem; font-weight: 600; color: var(--primary); background: var(--primary-lighter); padding: 4px 10px; border-radius: 12px; display: inline-block;">0 Tests Included</span>
+                </div>
+                <button class="modal-close" onclick="closeModal('packageTestsModal')">×</button>
+            </div>
+            <div class="modal-body" style="padding-top: 16px;">
+                <div id="pkgTestsModalList" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 280px; overflow-y: auto; padding: 4px 0;">
+                    <!-- All test tags will be generated here -->
+                </div>
+            </div>
+            <div class="modal-actions" style="margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--border);">
+                <button class="btn btn-secondary" onclick="closeModal('packageTestsModal')">Close</button>
             </div>
         </div>
     </div>

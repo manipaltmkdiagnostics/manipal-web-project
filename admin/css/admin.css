@@ -716,3 +716,27 @@ body {
 .btn-address-link:hover {
     color: #5a189a;
 }
+
+/* --- Read More Tests Button/Badge --- */
+.btn-read-more-tests {
+    background: var(--primary-lighter);
+    border: 1px dashed var(--primary);
+    color: var(--primary);
+    font-weight: 600;
+    cursor: pointer;
+    padding: 3px 8px;
+    font-family: inherit;
+    font-size: 0.75rem;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    transition: var(--transition);
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+
+.btn-read-more-tests:hover {
+    background: var(--primary);
+    color: white;
+    border-style: solid;
+}
