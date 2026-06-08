@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const db = require('../firebaseConfig');
+const { db } = require('../firebaseConfig');
 const { authenticateToken } = require('../middleware/auth');
 
 // POST /api/auth/login
@@ -13,13 +13,48 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ error: 'Username and password are required' });
         }
 
-        const snapshot = await db
+        let snapshot = await db
             .collection('admins')
             .where('username', '==', username)
             .limit(1)
             .get();
 
         if (snapshot.empty) {
+            // Check if there are ANY admins in the database
+            const allAdmins = await db.collection('admins').limit(1).get();
+            if (allAdmins.empty) {
+                // Database is empty. Let's check if the entered credentials match default env or fallback
+                const defaultUser = process.env.MASTER_ADMIN_USERNAME || 'masteradmin';
+                const defaultPass = process.env.MASTER_ADMIN_PASSWORD || 'Master@123';
+                
+                if (username === defaultUser && password === defaultPass) {
+                    const hashedPassword = await bcrypt.hash(defaultPass, 10);
+                    const newAdmin = {
+                        username: defaultUser,
+                        password_hash: hashedPassword,
+                        role: 'master',
+                        full_name: 'Master Admin',
+                        created_at: new Date().toISOString()
+                    };
+                    const docRef = await db.collection('admins').add(newAdmin);
+                    
+                    const token = jwt.sign(
+                        { id: docRef.id, username: defaultUser, role: 'master' },
+                        process.env.JWT_SECRET || 'fallback-secret',
+                        { expiresIn: '24h' }
+                    );
+                    
+                    return res.json({
+                        token,
+                        user: {
+                            id: docRef.id,
+                            username: defaultUser,
+                            full_name: 'Master Admin',
+                            role: 'master',
+                        },
+                    });
+                }
+            }
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 

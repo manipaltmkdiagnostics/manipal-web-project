@@ -390,20 +390,20 @@
 //     document.getElementById('packageSubmitBtn').textContent = 'Save Package';
 //     document.getElementById('packageForm').reset();
 //     document.getElementById('packageId').value = '';
-    
+
 //     // Load tests for selection
 //     const testsList = document.getElementById('packageTestsList');
 //     testsList.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">Loading tests...</p>';
-    
+
 //     try {
 //         const res = await apiFetch('/api/tests', { headers: authHeaders() });
 //         const tests = await res.json();
-        
+
 //         if (tests.length === 0) {
 //             testsList.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">No tests available. Please add tests first.</p>';
 //             return;
 //         }
-        
+
 //         testsList.innerHTML = tests.map(t => `
 //             <label style="display:flex;align-items:center;gap:10px;padding:6px;cursor:pointer;border-bottom:1px solid var(--border-light);">
 //                 <input type="checkbox" name="packageTests" value="${t.id}" style="width:16px;height:16px;accent-color:var(--primary);">
@@ -413,7 +413,7 @@
 //     } catch (err) {
 //         testsList.innerHTML = '<p style="color:var(--danger);font-size:0.9rem;">Failed to load tests.</p>';
 //     }
-    
+
 //     openModal('packageModal');
 // }
 
@@ -424,16 +424,16 @@
 //     document.getElementById('packageName').value = pkg.name;
 //     document.getElementById('packageDescription').value = pkg.description || '';
 //     document.getElementById('packagePrice').value = pkg.price;
-    
+
 //     // Load tests and check selected ones
 //     const testsList = document.getElementById('packageTestsList');
 //     testsList.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">Loading tests...</p>';
-    
+
 //     try {
 //         const res = await apiFetch('/api/tests', { headers: authHeaders() });
 //         const tests = await res.json();
 //         const selectedIds = (pkg.tests || []).map(t => t.id);
-        
+
 //         testsList.innerHTML = tests.map(t => `
 //             <label style="display:flex;align-items:center;gap:10px;padding:6px;cursor:pointer;border-bottom:1px solid var(--border-light);">
 //                 <input type="checkbox" name="packageTests" value="${t.id}" ${selectedIds.includes(t.id) ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--primary);">
@@ -443,7 +443,7 @@
 //     } catch (err) {
 //         testsList.innerHTML = '<p style="color:var(--danger);font-size:0.9rem;">Failed to load tests.</p>';
 //     }
-    
+
 //     openModal('packageModal');
 // }
 
@@ -749,7 +749,7 @@
 //         const id = document.getElementById('packageId').value;
 //         const testCheckboxes = document.querySelectorAll('input[name="packageTests"]:checked');
 //         const testIds = Array.from(testCheckboxes).map(cb => parseInt(cb.value));
-        
+
 //         if (testIds.length === 0) {
 //             showToast('Please select at least one test', 'error');
 //             return;
@@ -801,8 +801,8 @@
 /* ================================================
    ADMIN PORTAL — Core Logic
    ================================================ */
-
-const API = '';
+const API = 'https://us-central1-manipal-web-project-b835d.cloudfunctions.net/api';
+//const API = '';
 let currentUser = null;
 let token = null;
 
@@ -1190,20 +1190,20 @@ async function openPackageModal() {
     document.getElementById('packageSubmitBtn').textContent = 'Save Package';
     document.getElementById('packageForm').reset();
     document.getElementById('packageId').value = '';
-    
+
     // Load tests for selection
     const testsList = document.getElementById('packageTestsList');
     testsList.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">Loading tests...</p>';
-    
+
     try {
         const res = await apiFetch('/api/tests', { headers: authHeaders() });
         const tests = await res.json();
-        
+
         if (tests.length === 0) {
             testsList.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">No tests available. Please add tests first.</p>';
             return;
         }
-        
+
         testsList.innerHTML = tests.map(t => `
             <label style="display:flex;align-items:center;gap:10px;padding:6px;cursor:pointer;border-bottom:1px solid var(--border-light);">
                 <input type="checkbox" name="packageTests" value="${t.id}" style="width:16px;height:16px;accent-color:var(--primary);">
@@ -1213,7 +1213,7 @@ async function openPackageModal() {
     } catch (err) {
         testsList.innerHTML = '<p style="color:var(--danger);font-size:0.9rem;">Failed to load tests.</p>';
     }
-    
+
     openModal('packageModal');
 }
 
@@ -1224,16 +1224,16 @@ async function editPackage(pkg) {
     document.getElementById('packageName').value = pkg.name;
     document.getElementById('packageDescription').value = pkg.description || '';
     document.getElementById('packagePrice').value = pkg.price;
-    
+
     // Load tests and check selected ones
     const testsList = document.getElementById('packageTestsList');
     testsList.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">Loading tests...</p>';
-    
+
     try {
         const res = await apiFetch('/api/tests', { headers: authHeaders() });
         const tests = await res.json();
         const selectedIds = (pkg.tests || []).map(t => t.id);
-        
+
         testsList.innerHTML = tests.map(t => `
             <label style="display:flex;align-items:center;gap:10px;padding:6px;cursor:pointer;border-bottom:1px solid var(--border-light);">
                 <input type="checkbox" name="packageTests" value="${t.id}" ${selectedIds.includes(t.id) ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--primary);">
@@ -1243,7 +1243,7 @@ async function editPackage(pkg) {
     } catch (err) {
         testsList.innerHTML = '<p style="color:var(--danger);font-size:0.9rem;">Failed to load tests.</p>';
     }
-    
+
     openModal('packageModal');
 }
 
@@ -1549,7 +1549,7 @@ function setupForms() {
         const id = document.getElementById('packageId').value;
         const testCheckboxes = document.querySelectorAll('input[name="packageTests"]:checked');
         const testIds = Array.from(testCheckboxes).map(cb => parseInt(cb.value));
-        
+
         if (testIds.length === 0) {
             showToast('Please select at least one test', 'error');
             return;

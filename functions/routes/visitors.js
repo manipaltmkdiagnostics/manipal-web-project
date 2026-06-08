@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 // FIX 1: Import db directly from firebase.js — no longer depends on getDb() from database.js
-const db = require('../firebaseConfig');
+const { db } = require('../firebaseConfig');
 
 // POST /api/visitors — Track website visitors from welcome popup
 router.post('/', async (req, res) => {

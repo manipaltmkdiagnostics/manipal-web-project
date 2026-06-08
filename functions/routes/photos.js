@@ -1,44 +1,42 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
-// FIX 1: Import db directly from firebase.js — no longer depends on getDb() from database.js
-const db = require('../firebaseConfig');
+const { db, bucket } = require('../firebaseConfig');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const multipartParser = require('../middleware/multipart');
 
-// Ensure upload directory
-const photosDir = path.join(__dirname, '..', 'uploads', 'photos');
-if (!fs.existsSync(photosDir)) {
-    fs.mkdirSync(photosDir, { recursive: true });
+// Helper: Upload file to Firebase Storage
+async function uploadToStorage(buffer, folder, filename, mimeType) {
+    const blob = bucket.file(`${folder}/${filename}`);
+    const blobStream = blob.createWriteStream({
+        metadata: {
+            contentType: mimeType
+        }
+    });
+    return new Promise((resolve, reject) => {
+        blobStream.on('error', (err) => reject(err));
+        blobStream.on('finish', () => resolve());
+        blobStream.end(buffer);
+    });
 }
 
-// Multer config
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, photosDir),
-    filename: (req, file, cb) => {
-        const uniqueName =
-            'photo-' + Date.now() + '-' + Math.round(Math.random() * 1e9) + path.extname(file.originalname);
-        cb(null, uniqueName);
-    },
-});
-const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: (req, file, cb) => {
-        const allowed = /jpeg|jpg|png|gif|webp/;
-        const ext = allowed.test(path.extname(file.originalname).toLowerCase());
-        const mime = allowed.test(file.mimetype.split('/')[1]);
-        cb(null, ext && mime);
-    },
-});
+// Helper: Delete file from Firebase Storage
+async function deleteFromStorage(folder, filename) {
+    if (!filename) return;
+    const file = bucket.file(`${folder}/${filename}`);
+    try {
+        await file.delete();
+    } catch (err) {
+        console.warn(`File ${folder}/${filename} not deleted:`, err.message);
+    }
+}
 
 // GET /api/photos — public
 router.get('/', async (req, res) => {
     try {
         const { category } = req.query;
 
-        // FIX 2: Fetch all photos, filter category client-side to avoid composite index
+        // Fetch all photos, filter category client-side to avoid composite index
         const snapshot = await db.collection('photos').get();
         let photos = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
@@ -55,22 +53,24 @@ router.get('/', async (req, res) => {
 
         res.json(photos);
     } catch (err) {
-        // FIX 3: Added console.error so errors are visible in server logs
         console.error('GET /api/photos error:', err);
         res.status(500).json({ error: 'Server error', detail: err.message });
     }
 });
 
 // POST /api/photos — master admin only
-router.post('/', authenticateToken, requireRole('master'), upload.single('photo'), async (req, res) => {
+router.post('/', authenticateToken, requireRole('master'), multipartParser, async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'Photo file is required' });
+
+        const uniqueName = 'photo-' + Date.now() + '-' + Math.round(Math.random() * 1e9) + path.extname(req.file.originalname);
+        await uploadToStorage(req.file.buffer, 'photos', uniqueName, req.file.mimetype);
 
         const { title, category, description, display_order } = req.body;
 
         const photoData = {
             title: title || 'Untitled',
-            filename: req.file.filename,
+            filename: uniqueName,
             category: category || 'gallery',
             description: description || '',
             display_order: parseInt(display_order) || 0,
@@ -86,7 +86,7 @@ router.post('/', authenticateToken, requireRole('master'), upload.single('photo'
 });
 
 // PUT /api/photos/:id — master admin only
-router.put('/:id', authenticateToken, requireRole('master'), upload.single('photo'), async (req, res) => {
+router.put('/:id', authenticateToken, requireRole('master'), multipartParser, async (req, res) => {
     try {
         const id = req.params.id;
         const docRef = db.collection('photos').doc(id);
@@ -99,10 +99,11 @@ router.put('/:id', authenticateToken, requireRole('master'), upload.single('phot
 
         let filename = photo.filename;
         if (req.file) {
-            // Delete old file before replacing
-            const oldPath = path.join(photosDir, photo.filename);
-            if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-            filename = req.file.filename;
+            // Delete old file from storage
+            await deleteFromStorage('photos', photo.filename);
+            const uniqueName = 'photo-' + Date.now() + '-' + Math.round(Math.random() * 1e9) + path.extname(req.file.originalname);
+            await uploadToStorage(req.file.buffer, 'photos', uniqueName, req.file.mimetype);
+            filename = uniqueName;
         }
 
         const updates = {
@@ -131,14 +132,14 @@ router.delete('/:id', authenticateToken, requireRole('master'), async (req, res)
 
         if (!existing.exists) return res.status(404).json({ error: 'Photo not found' });
 
-        // Delete the physical file first
-        const filePath = path.join(photosDir, existing.data().filename);
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        // Delete the physical file from Firebase Storage
+        if (existing.data().filename) {
+            await deleteFromStorage('photos', existing.data().filename);
+        }
 
         await docRef.delete();
         res.json({ message: 'Photo deleted successfully' });
     } catch (err) {
-        // FIX 3: Added console.error — previously silent on delete errors
         console.error('DELETE /api/photos/:id error:', err);
         res.status(500).json({ error: 'Server error', detail: err.message });
     }

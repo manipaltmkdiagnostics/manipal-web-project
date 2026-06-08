@@ -1,36 +1,35 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
-const db = require('../firebaseConfig');
+const { db, bucket } = require('../firebaseConfig');
 const { authenticateToken } = require('../middleware/auth');
+const multipartParser = require('../middleware/multipart');
 
-// Ensure reports upload directory
-const reportsDir = path.join(__dirname, '..', 'uploads', 'reports');
-if (!fs.existsSync(reportsDir)) {
-    fs.mkdirSync(reportsDir, { recursive: true });
+// Helper: Upload file to Firebase Storage
+async function uploadToStorage(buffer, folder, filename, mimeType) {
+    const blob = bucket.file(`${folder}/${filename}`);
+    const blobStream = blob.createWriteStream({
+        metadata: {
+            contentType: mimeType
+        }
+    });
+    return new Promise((resolve, reject) => {
+        blobStream.on('error', (err) => reject(err));
+        blobStream.on('finish', () => resolve());
+        blobStream.end(buffer);
+    });
 }
 
-// Multer config for PDF reports
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, reportsDir),
-    filename: (req, file, cb) => {
-        const uniqueName = 'report-' + Date.now() + '-' + Math.round(Math.random() * 1e9) + '.pdf';
-        cb(null, uniqueName);
-    },
-});
-const upload = multer({
-    storage,
-    limits: { fileSize: 10 * 1024 * 1024 },
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype === 'application/pdf' || path.extname(file.originalname).toLowerCase() === '.pdf') {
-            cb(null, true);
-        } else {
-            cb(new Error('Only PDF files are allowed'));
-        }
-    },
-});
+// Helper: Delete file from Firebase Storage
+async function deleteFromStorage(folder, filename) {
+    if (!filename) return;
+    const file = bucket.file(`${folder}/${filename}`);
+    try {
+        await file.delete();
+    } catch (err) {
+        console.warn(`File ${folder}/${filename} not deleted:`, err.message);
+    }
+}
 
 function docToBooking(doc) {
     return { id: doc.id, ...doc.data() };
@@ -85,7 +84,7 @@ router.post('/', async (req, res) => {
                 status: 'pending',
                 report_file: null,
                 
-                // Issue 1 address fields
+                // Address fields
                 homeCollection: isHome,
                 homeAddress: addrVal,
                 locationLink: linkVal,
@@ -94,7 +93,7 @@ router.post('/', async (req, res) => {
                 address: addrVal,
                 location_link: linkVal,
 
-                // Issue 3 booking ID and creation fields
+                // Booking ID and creation fields
                 bookingId: formattedId,
                 createdAt: nowStr,
                 created_at: nowStr,
@@ -164,11 +163,23 @@ router.get('/:id/report', authenticateToken, async (req, res) => {
         const booking = docSnap.data();
         if (!booking.report_file) return res.status(404).json({ error: 'No report uploaded for this booking' });
 
-        const filePath = path.join(reportsDir, booking.report_file);
-        if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Report file not found on server' });
+        const file = bucket.file(`reports/${booking.report_file}`);
+        const [exists] = await file.exists();
+        if (!exists) return res.status(404).json({ error: 'Report file not found in Storage' });
 
         const downloadName = `Report-${booking.patient_name.replace(/[^a-zA-Z0-9]/g, '_')}-${req.params.id}.pdf`;
-        res.download(filePath, downloadName);
+        
+        res.setHeader('Content-Disposition', `attachment; filename="${downloadName}"`);
+        res.setHeader('Content-Type', 'application/pdf');
+
+        file.createReadStream()
+            .on('error', (err) => {
+                console.error('Error streaming PDF report:', err);
+                if (!res.headersSent) {
+                    res.status(500).json({ error: 'Error downloading report file' });
+                }
+            })
+            .pipe(res);
     } catch (err) {
         console.error('GET /api/bookings/:id/report error:', err);
         res.status(500).json({ error: 'Server error', detail: err.message });
@@ -176,7 +187,7 @@ router.get('/:id/report', authenticateToken, async (req, res) => {
 });
 
 // PUT /api/bookings/:id — admin only (with optional PDF report upload)
-router.put('/:id', authenticateToken, upload.single('report'), async (req, res) => {
+router.put('/:id', authenticateToken, multipartParser, async (req, res) => {
     try {
         const { id } = req.params;
         const docRef = db.collection('bookings').doc(id);
@@ -195,10 +206,11 @@ router.put('/:id', authenticateToken, upload.single('report'), async (req, res) 
         let reportFile = booking.report_file;
         if (req.file) {
             if (booking.report_file) {
-                const oldPath = path.join(reportsDir, booking.report_file);
-                if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+                await deleteFromStorage('reports', booking.report_file);
             }
-            reportFile = req.file.filename;
+            const uniqueName = 'report-' + Date.now() + '-' + Math.round(Math.random() * 1e9) + '.pdf';
+            await uploadToStorage(req.file.buffer, 'reports', uniqueName, req.file.mimetype);
+            reportFile = uniqueName;
         }
 
         await docRef.update({ status, notes, report_file: reportFile, updated_at: new Date().toISOString() });
@@ -221,8 +233,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 
         const booking = existing.data();
         if (booking.report_file) {
-            const filePath = path.join(reportsDir, booking.report_file);
-            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+            await deleteFromStorage('reports', booking.report_file);
         }
 
         await docRef.delete();

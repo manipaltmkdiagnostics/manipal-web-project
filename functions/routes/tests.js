@@ -1,37 +1,35 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
-// FIX 1: Import db directly from firebase.js — no longer depends on getDb() from database.js
-const db = require('../firebaseConfig');
+const { db, bucket } = require('../firebaseConfig');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const multipartParser = require('../middleware/multipart');
 
-// Ensure test-images upload directory
-const imagesDir = path.join(__dirname, '..', 'uploads', 'test-images');
-if (!fs.existsSync(imagesDir)) {
-    fs.mkdirSync(imagesDir, { recursive: true });
+// Helper: Upload file to Firebase Storage
+async function uploadToStorage(buffer, folder, filename, mimeType) {
+    const blob = bucket.file(`${folder}/${filename}`);
+    const blobStream = blob.createWriteStream({
+        metadata: {
+            contentType: mimeType
+        }
+    });
+    return new Promise((resolve, reject) => {
+        blobStream.on('error', (err) => reject(err));
+        blobStream.on('finish', () => resolve());
+        blobStream.end(buffer);
+    });
 }
 
-// Multer config for test images
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, imagesDir),
-    filename: (req, file, cb) => {
-        const uniqueName =
-            'test-' + Date.now() + '-' + Math.round(Math.random() * 1e9) + path.extname(file.originalname);
-        cb(null, uniqueName);
-    },
-});
-const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: (req, file, cb) => {
-        const allowed = /jpeg|jpg|png|gif|webp/;
-        const ext = allowed.test(path.extname(file.originalname).toLowerCase());
-        const mime = allowed.test(file.mimetype.split('/')[1]);
-        cb(null, ext && mime);
-    },
-});
+// Helper: Delete file from Firebase Storage
+async function deleteFromStorage(folder, filename) {
+    if (!filename) return;
+    const file = bucket.file(`${folder}/${filename}`);
+    try {
+        await file.delete();
+    } catch (err) {
+        console.warn(`File ${folder}/${filename} not deleted:`, err.message);
+    }
+}
 
 // Helper: convert a Firestore doc to a plain object with id
 function docToTest(doc) {
@@ -44,8 +42,7 @@ router.get('/', async (req, res) => {
         const { search, category, popular } = req.query;
 
         // Fetch ALL docs then filter entirely client-side in Node —
-        // avoids ANY Firestore index requirement (single-field boolean indexes
-        // are not auto-created and silently return empty results).
+        // avoids ANY Firestore index requirement.
         const snapshot = await db.collection('tests').get();
         console.log(`[GET /api/tests] Total docs in collection: ${snapshot.size}`);
 
@@ -102,7 +99,7 @@ router.get('/categories', async (req, res) => {
 });
 
 // POST /api/tests — master admin only
-router.post('/', authenticateToken, requireRole('master'), upload.single('image'), async (req, res) => {
+router.post('/', authenticateToken, requireRole('master'), multipartParser, async (req, res) => {
     try {
         console.log('Creating test...');
         const {
@@ -125,7 +122,13 @@ router.post('/', authenticateToken, requireRole('master'), upload.single('image'
             return res.status(400).json({ error: 'Name and price are required' });
         }
 
-        const imageFile = req.file ? req.file.filename : null;
+        let imageFile = null;
+        if (req.file) {
+            const uniqueName = 'test-' + Date.now() + '-' + Math.round(Math.random() * 1e9) + path.extname(req.file.originalname);
+            await uploadToStorage(req.file.buffer, 'test-images', uniqueName, req.file.mimetype);
+            imageFile = uniqueName;
+        }
+
         const stdSize = image_standard_size === 'false' || image_standard_size === '0' ? false : true;
 
         const testData = {
@@ -158,7 +161,7 @@ router.post('/', authenticateToken, requireRole('master'), upload.single('image'
 });
 
 // PUT /api/tests/:id — master admin only
-router.put('/:id', authenticateToken, requireRole('master'), upload.single('image'), async (req, res) => {
+router.put('/:id', authenticateToken, requireRole('master'), multipartParser, async (req, res) => {
     try {
         console.log('Updating test...');
         const id = req.params.id;
@@ -189,16 +192,16 @@ router.put('/:id', authenticateToken, requireRole('master'), upload.single('imag
         let imageFile = test.image_file;
         if (remove_image === 'true' || remove_image === '1') {
             if (test.image_file) {
-                const oldPath = path.join(imagesDir, test.image_file);
-                if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+                await deleteFromStorage('test-images', test.image_file);
             }
             imageFile = null;
         } else if (req.file) {
             if (test.image_file) {
-                const oldPath = path.join(imagesDir, test.image_file);
-                if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+                await deleteFromStorage('test-images', test.image_file);
             }
-            imageFile = req.file.filename;
+            const uniqueName = 'test-' + Date.now() + '-' + Math.round(Math.random() * 1e9) + path.extname(req.file.originalname);
+            await uploadToStorage(req.file.buffer, 'test-images', uniqueName, req.file.mimetype);
+            imageFile = uniqueName;
         }
 
         const parseBool = (val, fallback) => {
@@ -261,6 +264,11 @@ router.delete('/:id', authenticateToken, requireRole('master'), async (req, res)
                 const updatedIds = data.testIds.filter(tid => tid !== id);
                 await pkgDoc.ref.update({ testIds: updatedIds });
             }
+        }
+
+        // Also delete the image from Firebase Storage if it exists
+        if (existing.data().image_file) {
+            await deleteFromStorage('test-images', existing.data().image_file);
         }
 
         await docRef.delete();
